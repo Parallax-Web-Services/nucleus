@@ -64,7 +64,7 @@ The hosted panel is at <https://nebula.parallax.link/dashboard>. The development
 ./bin/nebula logout
 ```
 
-Sign-in opens the NEXUS flow through NEBULA with PKCE and a temporary loopback callback. The CLI stores its own credentials in private local state. Machine enrollment remains a separate approval of a machine key; it does not sign in the user or create fabric membership.
+Sign-in opens the NEXUS flow through NEBULA with PKCE and a temporary loopback callback. Complete sign-in in a browser on the machine running the CLI so the browser can reach that callback. `--no-open` lets you open the URL manually on the same machine; it is not a device-code flow for a headless server. The CLI stores its own credentials in private local state. Machine enrollment remains a separate approval of a machine key; it does not sign in the user or create fabric membership.
 
 ## Managed Kubernetes
 
