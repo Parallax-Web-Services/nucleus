@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "purpose": "Portable text-generation catalog metadata and example exact-artifact owner approval; no runtime path, credentials, inference startup or automatic authorization.",
+  "model": {
+    "id": "gemma-3-4b-it-q4-k-m-text",
+    "revision": "d0976223747697cb51e056d85c532013931fe52e",
+    "source": "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/d0976223747697cb51e056d85c532013931fe52e/gemma-3-4b-it-Q4_K_M.gguf",
+    "license": "gemma",
+    "architecture": "gemma3",
+    "format": "GGUF",
+    "quantization": "Q4_K_M",
+    "sha256": "882e8d2db44dc554fb0ea5077cb7e4bc49e7342a1f0da57901c0802ea21a0863",
+    "size_bytes": 2489757856,
+    "required_memory_bytes": 8589934592,
+    "workloads": [
+      "text-generation"
+    ],
+    "runtime": "llama.cpp",
+    "provenance": {
+      "publisher": "Google",
+      "country": "US",
+      "evidence": [
+        "https://huggingface.co/google/gemma-3-4b-it",
+        "https://ai.google.dev/gemma/docs/core/model_card_3",
+        "https://ai.google.dev/gemma/terms"
+      ],
+      "lineage_complete": false,
+      "lineage_disclosure": "publisher-disclosed",
+      "base_models": [
+        {
+          "id": "google/gemma-3-4b-it",
+          "revision": "Gemma 3 4B IT March 2025 release",
+          "publisher": "Google",
+          "country": "US",
+          "source": "https://huggingface.co/google/gemma-3-4b-it",
+          "evidence": [
+            "https://huggingface.co/google/gemma-3-4b-it",
+            "https://arxiv.org/html/2503.19786v1"
+          ]
+        },
+        {
+          "id": "Google Gemma 3 SigLIP vision encoder",
+          "revision": "Gemma 3 4B IT March 2025 release",
+          "publisher": "Google",
+          "country": "US",
+          "source": "https://huggingface.co/google/gemma-3-4b-it",
+          "evidence": [
+            "https://arxiv.org/html/2503.19786v1",
+            "https://ai.google.dev/gemma/docs/core/model_card_3"
+          ]
+        }
+      ]
+    }
+  },
+  "example_owner_approval": {
+    "sha256": "882e8d2db44dc554fb0ea5077cb7e4bc49e7342a1f0da57901c0802ea21a0863",
+    "provenance": {
+      "publisher": "Google",
+      "country": "US",
+      "evidence": [
+        "https://huggingface.co/google/gemma-3-4b-it",
+        "https://ai.google.dev/gemma/docs/core/model_card_3",
+        "https://ai.google.dev/gemma/terms"
+      ],
+      "lineage_complete": false,
+      "lineage_disclosure": "publisher-disclosed",
+      "base_models": [
+        {
+          "id": "google/gemma-3-4b-it",
+          "revision": "Gemma 3 4B IT March 2025 release",
+          "publisher": "Google",
+          "country": "US",
+          "source": "https://huggingface.co/google/gemma-3-4b-it",
+          "evidence": [
+            "https://huggingface.co/google/gemma-3-4b-it",
+            "https://arxiv.org/html/2503.19786v1"
+          ]
+        },
+        {
+          "id": "Google Gemma 3 SigLIP vision encoder",
+          "revision": "Gemma 3 4B IT March 2025 release",
+          "publisher": "Google",
+          "country": "US",
+          "source": "https://huggingface.co/google/gemma-3-4b-it",
+          "evidence": [
+            "https://arxiv.org/html/2503.19786v1",
+            "https://ai.google.dev/gemma/docs/core/model_card_3"
+          ]
+        }
+      ]
+    },
+    "allow_publisher_disclosed_lineage": true,
+    "review_note": "Example scope: only this exact artifact SHA256 with identical publisher-disclosed provenance. Disclosure remains incomplete; undisclosed teacher, reward-model and quantizer-source checkpoint identities are not asserted. Known Chinese-origin model identities, ancestors, jurisdictions and hashes remain blocked. An operator must review and explicitly adopt this exact entry; this portable metadata alone does not authorize execution."
+  }
+}

@@ -1,0 +1,6 @@
+/.tools/
+/.dependencies/
+/.runtime/
+/bin/
+/dist/
+__pycache__/

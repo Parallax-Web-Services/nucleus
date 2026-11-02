@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <title>Nucleus · Private fabric</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#fabric-map">Skip to resource map</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Nucleus navigation">
+      <a href="#fabric-map" class="brand" aria-label="Nucleus resource map"><svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="4" fill="currentColor"/><ellipse cx="18" cy="18" rx="16" ry="7" stroke="currentColor" stroke-width="1.5" transform="rotate(-38 18 18)"/><ellipse cx="18" cy="18" rx="16" ry="7" stroke="currentColor" stroke-width="1.5" transform="rotate(38 18 18)"/></svg><span>nucleus<span class="brand-dot">.</span></span></a>
+      <div class="workspace-label">PRIVATE CLOUD</div>
+      <a class="nav-item active" href="#fabric-map" aria-current="page"><span class="nav-icon" aria-hidden="true">◈</span>Resource map<span class="nav-count" id="nav-count">—</span></a>
+      <div class="sidebar-note"><span class="tiny-dot"></span> Your hardware.<br>Your network. Your cloud.</div>
+      <div class="sidebar-bottom"><span class="alpha-label">ALPHA 0.2</span><span>PARALLAX</span></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong>Private fabric</strong></div><span class="session-status" id="session-status" role="status"><i class="tiny-dot"></i><span id="session-label">Connecting to agent</span></span></header>
+      <section class="page-heading"><div><div class="eyebrow">YOUR COMPUTING UNIVERSE</div><h1>Resource map</h1><p>One view of the machines in your private fabric.</p></div><button id="refresh" class="button" type="button"><span aria-hidden="true">↻</span> Refresh</button></section>
+      <div class="notice error-notice" id="error" hidden role="alert"></div>
+      <section class="summary-grid" aria-label="Online resource inventory">
+        <article class="summary-card"><div class="metric-label"><span>ONLINE NODES</span><span class="metric-symbol" aria-hidden="true">◉</span></div><div class="metric-value" id="online-count">—</div><p id="node-summary">Waiting for the local agent</p></article>
+        <article class="summary-card"><div class="metric-label"><span>LOGICAL CPU CORES</span><span class="metric-symbol" aria-hidden="true">▦</span></div><div class="metric-value" id="core-count">—</div><p>Reported by online machines</p></article>
+        <article class="summary-card"><div class="metric-label"><span>AVAILABLE MEMORY</span><span class="metric-symbol" aria-hidden="true">▤</span></div><div class="metric-value"><span id="memory-free">—</span><small id="memory-unit"></small></div><p id="memory-summary">Waiting for resource inventory</p></article>
+      </section>
+      <p class="inventory-note"><span aria-hidden="true">ⓘ</span> Online inventory only. Resources are not pooled or scheduled.</p>
+      <div class="workspace-grid">
+        <section class="panel map-panel" id="fabric-map" tabindex="-1" aria-labelledby="map-title"><div class="panel-heading"><div><h2 id="map-title">Your fabric</h2><p id="fabric-label">Establishing local identity</p></div><span class="privacy-badge"><span class="tiny-dot"></span>Private</span></div>
+          <div class="topology" id="topology"><div class="map-grid" aria-hidden="true"></div><svg id="topology-lines" aria-hidden="true"></svg><div class="local-node-row" id="local-node"></div><div class="peer-node-grid" id="peer-nodes"></div><div class="map-empty" id="map-empty" hidden><div class="empty-orbit" aria-hidden="true">＋</div><h3>A fabric starts with one machine.</h3><p>Invite another machine from your terminal.<br>Its resources appear after the first heartbeat.</p></div></div>
+          <div class="map-footer"><div class="legend"><span><i class="tiny-dot"></i>Online</span><span><i class="tiny-dot muted-dot"></i>Offline</span><span><i class="tiny-dot awaiting-dot"></i>Awaiting</span></div><span id="sample-time">Waiting for first sample</span></div>
+        </section>
+        <section class="panel inspector" aria-labelledby="inspector-title"><div class="panel-heading"><div><div class="eyebrow">NODE INSPECTOR</div><h2 id="inspector-title">Select a machine</h2></div><span class="node-kind" id="inspector-kind">—</span></div><div id="inspector-placeholder" class="inspector-placeholder">Live measurements will appear here once the local agent responds.</div><div id="inspector-body" hidden>
+          <div class="node-status-line"><span id="inspector-status" class="status-badge">—</span><span id="inspector-system">—</span></div><p id="inspector-error" class="node-error" hidden></p>
+          <div class="resource-meter"><div class="meter-label"><span>CPU activity</span><strong id="cpu-value">—</strong></div><div class="meter-track"><div class="meter-fill" id="cpu-fill"></div></div><p id="cpu-hint">—</p></div>
+          <div class="resource-meter"><div class="meter-label"><span>Memory used</span><strong id="memory-value">—</strong></div><div class="meter-track"><div class="meter-fill purple" id="memory-fill"></div></div><p id="memory-hint">—</p></div>
+          <div class="resource-meter"><div class="meter-label"><span>Root storage used</span><strong id="storage-value">—</strong></div><div class="meter-track"><div class="meter-fill amber" id="storage-fill"></div></div><p id="storage-hint">—</p></div>
+          <dl class="node-facts"><div><dt>Endpoint</dt><dd id="detail-endpoint">—</dd></div><div><dt>Uptime</dt><dd id="detail-uptime">—</dd></div><div><dt>Network</dt><dd id="detail-network">—</dd></div><div><dt>GPU inventory</dt><dd id="detail-gpu">Unavailable</dd></div><div><dt>Last seen</dt><dd id="detail-seen">—</dd></div><div><dt>Node ID</dt><dd id="detail-id" class="mono">—</dd></div></dl>
+        </div></section>
+      </div>
+      <section class="panel terminal-panel" aria-labelledby="terminal-title"><div class="terminal-intro"><span class="terminal-icon" aria-hidden="true">›_</span><div><h2 id="terminal-title">Bring another machine into your fabric</h2><p>Exchange invitation files through a trusted channel. Verify the signed node identity, then confirm membership on both nodes.</p></div></div><div class="command-steps"><div class="command-row"><span class="step-label">01 · OWNER</span><code>zh invite --endpoint https://LAN_IP:9461 --out invite.json</code></div><div class="command-row"><span class="step-label">02 · NEW NODE</span><code>zh join invite.json --out request.json</code></div><div class="command-row"><span class="step-label">03 · OWNER</span><code>zh inspect request.json</code></div><div class="command-row"><span class="step-label">04 · OWNER</span><code>zh accept request.json --out grant.json</code></div><div class="command-row"><span class="step-label">05 · NEW NODE</span><code>zh join --accept grant.json</code></div></div><div class="terminal-footer"><span>Authenticated heartbeats update this map every two seconds. A node becomes offline after ten seconds without a heartbeat.</span><span class="read-only-label">READ-ONLY VIEW</span></div></section>
+      <footer class="page-footer"><span>Independent machines. Explicit membership.</span><button id="copy-json" class="text-button" type="button" disabled>Copy inventory JSON <span aria-hidden="true">↗</span></button></footer>
+    </main>
+  </div>
+</body>
+</html>
