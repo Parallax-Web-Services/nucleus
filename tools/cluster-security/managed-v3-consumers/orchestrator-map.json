@@ -1,0 +1,19 @@
+{
+  "tree": "/tmp/nebula-managed-v3-consumers-rkss039w",
+  "orchestrator_original": "/tmp/nebula-backup-orchestrator.py",
+  "orchestrator_original_sha256": "20c1c17865da89b0ce628f76381f9ed2d91bb3a3332c27311d7a8959e691ea0e",
+  "orchestrator_literal_changes": {
+    "dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab": "b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095",
+    "/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py": "/usr/local/lib/parallax-nebula-managed-v3/alpha-managed-health-bridge.py"
+  },
+  "orchestrator_literal_occurrences": {
+    "dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab": 2,
+    "/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py": 1
+  },
+  "orchestrator_test_original": "/tmp/test-nebula-backup-orchestrator.py",
+  "orchestrator_test_original_sha256": "c653836bc0ee784d7482a0d531c5a7229961cf74fbb95aa229a05be549bfdcea",
+  "orchestrator_test_redirects": {
+    "/tmp/nebula-backup-orchestrator.py": "/tmp/nebula-managed-v3-consumers-rkss039w/source/nebula-backup-orchestrator.py",
+    "/tmp/nebula-alpha-managed-health-bridge.py": "/tmp/nebula-managed-v3-consumers-rkss039w/references/alpha-managed-health-bridge.py"
+  }
+}

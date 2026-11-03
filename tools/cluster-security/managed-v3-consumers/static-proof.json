@@ -1,0 +1,61 @@
+{
+  "alpha": {
+    "after_sha256": "31f22873e7acb952d893af21e02f5fce590f0cab092d12729eca7f68c2e1de6b",
+    "before_sha256": "9952511ab318f9f6bb47094f954d68ee16194e253f250831483017fd61f347ec",
+    "copied_tests_two_import_redirects_only": true,
+    "exact_three_literal_substitutions_only": true,
+    "inverse_normalized_ast_identical": true,
+    "readonly_source_required_future_argument": "/usr/local/lib/parallax-nebula-managed-v3/alpha-managed-foundation-readonly.py",
+    "test_duration_seconds": 0.064,
+    "tests_passed": 14,
+    "tests_run": 14
+  },
+  "frozen_v3_all_eight_and_their_originals_unchanged": true,
+  "frozen_v3_manifest_sha256": "3a6ade91c55679031a93f2caf9cc042130c46d55f631c90a3aa7fdace6d3b3d0",
+  "guest_tests_not_run": "Guest source unchanged; no key or native-helper execution authorized",
+  "operational_execution": false,
+  "orchestrator": {
+    "after_sha256": "8fb59f2303f40b1d8d18dfe0afb6c66a201dbfe6ef54ac5d1b6fbe9eeb9db857",
+    "all_other_assignments_identical": true,
+    "before_sha256": "20c1c17865da89b0ce628f76381f9ed2d91bb3a3332c27311d7a8959e691ea0e",
+    "copied_tests_import_paths_only": true,
+    "embedded_broker_inverse_normalized_bytes_ast_identical": true,
+    "exact_literal_substitution_only": true,
+    "guest_receiver_identical": true,
+    "inverse_normalized_ast_identical": true,
+    "names_exactly_unchanged": [
+      "nebula-backup-common.py",
+      "nebula-backup-envelope-policy.py",
+      "nebula-backup-guest.py",
+      "nebula-backup-target.py"
+    ],
+    "test_duration_seconds": 8.37,
+    "tests_passed": 69,
+    "tests_run": 69
+  },
+  "schema_version": 1,
+  "status": "source_only_static_proof_passed",
+  "unchanged_original_sha256": {
+    "/tmp/nebula-backup-common.py": "cd5fc702868af2e74965aa13677c691bd3eb872cdb20d5db45e0f0efe6855322",
+    "/tmp/nebula-backup-envelope-policy.py": "c34deff89a5ddac75f1a01ae84e114fa004bc54edeee97d23d8f722990884ee7",
+    "/tmp/nebula-backup-guest.py": "e400ad8cd784231919eccf7757eb97d95522e744e6ca796d7baa97254b3768f9",
+    "/tmp/nebula-backup-target.py": "9ceb709da81f67eb3ebfcd2c42f1290084ad1cdad426d42c31eb3db843c22fff",
+    "/tmp/nebula-kubelet-client-renewal.py": "8dad25eb92f59616cb211cfba493aac06bc424feb34f550148a96967e046dc3b",
+    "/tmp/nebula-kubelet-renewal-alpha.py": "9952511ab318f9f6bb47094f954d68ee16194e253f250831483017fd61f347ec",
+    "/tmp/test-nebula-kubelet-client-renewal.py": "5d4da939890b3f6c58b9b481513e8e8ccca869ed403dd27a10b52a10fd8b209c",
+    "/tmp/test-nebula-kubelet-renewal-alpha.py": "14bca3a1363271901951a3fc425b89f08c2da7fb78b429efd5622f0ad295ff55"
+  },
+  "unchanged_runtime_wire_manifest": {
+    "bytes": 411,
+    "exact_four_names": [
+      "nebula-backup-common.py",
+      "nebula-backup-envelope-policy.py",
+      "nebula-backup-guest.py",
+      "nebula-backup-target.py"
+    ],
+    "orchestrator_not_added": true,
+    "path": "/tmp/parallax-nebula-backup-source-20261102/tools/cluster-security/backup/source/manifest.json",
+    "schema_version": 1,
+    "sha256": "f6b0114120f9355741416bdc4f4dad9a35c7f2b6d4504a7905fca4a1c5faa59c"
+  }
+}

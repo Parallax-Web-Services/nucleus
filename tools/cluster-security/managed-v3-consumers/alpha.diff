@@ -1,0 +1,29 @@
+--- /tmp/nebula-kubelet-renewal-alpha.py
++++ /tmp/nebula-managed-v3-consumers-rkss039w/source/nebula-kubelet-renewal-alpha.py
+@@ -6,12 +6,12 @@
+ from __future__ import annotations
+ import argparse,base64,contextlib,fcntl,hashlib,json,os,re,stat,sys,time,types
+ from pathlib import Path
+-READONLY_SHA='2c2cafb50457b58bfaecca9efb2e87d36b88fe8dd87f72115937462d5d73e435'
+-BRIDGE_SHA='dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab'
++READONLY_SHA='be39063281364f97ea72d19df3c57f97df7da0dd1e06e617d34a188c5d0f070b'
++BRIDGE_SHA='b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095'
+ COMMON_SHA='cd5fc702868af2e74965aa13677c691bd3eb872cdb20d5db45e0f0efe6855322'
+ DURABILITY_SHA='0883835c069808543115f102ffa42fffca7e6a716bef1badb532f1a6b1f5e926'
+ GUEST_SHA='8dad25eb92f59616cb211cfba493aac06bc424feb34f550148a96967e046dc3b'
+-BRIDGE_PATH=Path('/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py')
++BRIDGE_PATH=Path('/usr/local/lib/parallax-nebula-managed-v3/alpha-managed-health-bridge.py')
+ PHASES=('check','capture','enable-renewal','complete-renewal','prepare-proof','submit-proof','verify-proof','cleanup-proof','complete-cleanup')
+ def need(ok,reason):
+  if not ok:raise RuntimeError(reason)
+--- /tmp/test-nebula-kubelet-renewal-alpha.py
++++ /tmp/nebula-managed-v3-consumers-rkss039w/tests/test-nebula-kubelet-renewal-alpha.py
+@@ -5,7 +5,7 @@
+ from unittest.mock import patch
+ def load(name,path):
+  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+-a=load('tls_alpha','/tmp/nebula-kubelet-renewal-alpha.py');frozen=load('ro_fixtures','/tmp/test-nebula-alpha-managed-foundation-readonly.py');w=frozen.w;d=frozen.d
++a=load('tls_alpha','/tmp/nebula-managed-v3-consumers-rkss039w/source/nebula-kubelet-renewal-alpha.py');frozen=load('ro_fixtures','/tmp/nebula-managed-v3-source-egkc2mqv/test_foundation.py');w=frozen.w;d=frozen.d
+ class ActualComposition(unittest.TestCase):
+  def fixture(self):
+   f=frozen.Fixture();self.addCleanup(f.close);return f

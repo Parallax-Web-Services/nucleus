@@ -1,0 +1,14 @@
+--- accepted/BROKER(decoded)
++++ v3/BROKER(decoded)
+@@ -14,9 +14,9 @@
+ def module(path,pin,name):
+  raw=public_source(path,pin);m=types.ModuleType(name);m.__file__=str(path);sys.modules[name]=m;exec(compile(raw,str(path),'exec'),m.__dict__);return m
+ def managed_bridge():
+- path=Path('/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py');fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
++ path=Path('/usr/local/lib/parallax-nebula-managed-v3/alpha-managed-health-bridge.py');fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+  try:
+-  st=os.fstat(fd);need(path.resolve()==path and stat.S_ISREG(st.st_mode) and st.st_uid==st.st_gid==0 and st.st_nlink==1 and stat.S_IMODE(st.st_mode)&0o022==0 and st.st_size<262144,'managed_bridge_source_custody');raw=os.read(fd,262144);need(len(raw)==st.st_size and identity(st)==identity(os.fstat(fd))==identity(path.lstat()) and hashlib.sha256(raw).hexdigest()=='dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab','managed_bridge_source_pin')
++  st=os.fstat(fd);need(path.resolve()==path and stat.S_ISREG(st.st_mode) and st.st_uid==st.st_gid==0 and st.st_nlink==1 and stat.S_IMODE(st.st_mode)&0o022==0 and st.st_size<262144,'managed_bridge_source_custody');raw=os.read(fd,262144);need(len(raw)==st.st_size and identity(st)==identity(os.fstat(fd))==identity(path.lstat()) and hashlib.sha256(raw).hexdigest()=='b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095','managed_bridge_source_pin')
+  finally:os.close(fd)
+  result=types.ModuleType('_accepted_managed_health_bridge');result.__file__=str(path);exec(compile(raw,str(path),'exec'),result.__dict__);return result
+ def managed_lifecycle(work,external_guard):

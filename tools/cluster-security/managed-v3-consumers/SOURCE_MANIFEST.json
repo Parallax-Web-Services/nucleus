@@ -1,0 +1,74 @@
+{
+  "accepted_source_changes_only": {
+    "alpha": "two dependency pins and one fixed path",
+    "orchestrator": "two Bridge pin occurrences and one fixed path"
+  },
+  "files": {
+    "README-review.md": {
+      "bytes": 4199,
+      "sha256": "30577ce078755e3ef065f717900c27df59dd41f6f746319ba9f68e9312478d9a"
+    },
+    "alpha-map.json": {
+      "bytes": 4422,
+      "sha256": "3459c04b60d1a9d7c5a6d3185274e1ba589870915863722459b3a982240f725b"
+    },
+    "alpha.diff": {
+      "bytes": 2068,
+      "sha256": "c54b994f3c799db679a1713df41802c870ecde40beb7f48da205bef16378b61f"
+    },
+    "orchestrator-broker-decoded.diff": {
+      "bytes": 1702,
+      "sha256": "ec64524c809c0c169906533c9f0b87fdf9737494d197aef797bdad9acc17d70d"
+    },
+    "orchestrator-map.json": {
+      "bytes": 1223,
+      "sha256": "23f86e868fb96df6e93ee5bcda1d908ce3db37347104a6123cc85ad792e273cd"
+    },
+    "orchestrator-test-redirects.diff": {
+      "bytes": 2581,
+      "sha256": "d51a0c8e10e3ffd11215a493d0cac0a31d93deb8ca14e83cceb5db23cb70f020"
+    },
+    "orchestrator.diff": {
+      "bytes": 28306,
+      "sha256": "1cd3416d6822248a407cfa0beebac6ab003b7d3d4d12832c506461613b958e6d"
+    },
+    "references/alpha-managed-foundation-readonly.py": {
+      "bytes": 8279,
+      "sha256": "be39063281364f97ea72d19df3c57f97df7da0dd1e06e617d34a188c5d0f070b"
+    },
+    "references/alpha-managed-health-bridge.py": {
+      "bytes": 10888,
+      "sha256": "b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095"
+    },
+    "source/nebula-backup-orchestrator.py": {
+      "bytes": 43395,
+      "sha256": "8fb59f2303f40b1d8d18dfe0afb6c66a201dbfe6ef54ac5d1b6fbe9eeb9db857"
+    },
+    "source/nebula-kubelet-renewal-alpha.py": {
+      "bytes": 10151,
+      "sha256": "31f22873e7acb952d893af21e02f5fce590f0cab092d12729eca7f68c2e1de6b"
+    },
+    "static-proof.json": {
+      "bytes": 3072,
+      "sha256": "51a872ca6de28dd3950caa0b7e2a1e404288519a7f150ff88955eb5ef9d7dd1d"
+    },
+    "test-results.json": {
+      "bytes": 793,
+      "sha256": "6f0ae227cd040142d92a17cba08589994abf8b5b2d034d918f937232cc4de63b"
+    },
+    "tests/test-nebula-backup-orchestrator.py": {
+      "bytes": 41939,
+      "sha256": "0d7b3008d695ccd4156a7dde6f20c9d383f8f1656a24ebe8f8036e55de42f6dd"
+    },
+    "tests/test-nebula-kubelet-renewal-alpha.py": {
+      "bytes": 6885,
+      "sha256": "6f051251ee7c668f5b4fd2e23ff17c2b97ec6ebfde0b206abd52aa74df397789"
+    }
+  },
+  "operational_execution": false,
+  "runtime_wire_manifest_changed": false,
+  "schema_version": 1,
+  "source_directory": "/tmp/nebula-managed-v3-consumers-rkss039w",
+  "status": "source_only_not_staged_not_admitted",
+  "tests_passed": 83
+}

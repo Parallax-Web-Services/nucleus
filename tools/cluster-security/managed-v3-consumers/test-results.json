@@ -1,0 +1,37 @@
+{
+  "guest_changed": false,
+  "guest_tests_run": false,
+  "operational_actions": false,
+  "runs": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/nebula-managed-v3-consumers-rkss039w/tests/test-nebula-backup-orchestrator.py"
+      ],
+      "duration_seconds": 8.37,
+      "exit_code": 0,
+      "passed": 69,
+      "suite": "orchestrator",
+      "tests": 69,
+      "uid": 0
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "/tmp/nebula-managed-v3-consumers-rkss039w/tests/test-nebula-kubelet-renewal-alpha.py",
+        "-v"
+      ],
+      "duration_seconds": 0.064,
+      "exit_code": 0,
+      "passed": 14,
+      "suite": "alpha",
+      "tests": 14,
+      "uid": 0
+    }
+  ],
+  "schema_version": 1,
+  "status": "passed",
+  "total_tests": 83
+}
