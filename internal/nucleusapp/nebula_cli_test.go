@@ -74,7 +74,7 @@ func TestNebulaStandaloneBinariesShareRealFabricIdentity(t *testing.T) {
 		}
 		return string(output)
 	}
-	if got := run("nebula", "relative", unused, true, "version"); got != "nebula 0.6.0-dev\n" {
+	if got := run("nebula", "relative", unused, true, "version"); got != "nebula 0.6.1-dev\n" {
 		t.Fatalf("own version: %q", got)
 	}
 	if got := run("nucleus", "relative", unused, true, "--version"); got != "nucleus 0.5.0-alpha\n" {

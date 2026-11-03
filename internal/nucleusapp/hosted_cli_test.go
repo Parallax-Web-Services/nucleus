@@ -31,7 +31,7 @@ func hostedState(c *hostedCLI, origin string) hostedCredentials {
 func discoveryFixture(origin string) hostedDiscovery {
 	return hostedDiscovery{SchemaVersion: 1, Issuer: origin, ClientID: "cli-fixture-id", Authorization: origin + "/oauth/authorize", Token: origin + "/oauth/token", Revocation: origin + "/api/v1/session/revoke", API: origin + "/api/v1", CallbackPath: "/oauth/callback", Scopes: []string{"nebula:read", "nebula:manage"}}
 }
-func TestHostedLoginRealLoopbackPKCEAndPrivatePersistence(t *testing.T) {
+func TestHostedLoginExplicitLoopbackPKCEAndPrivatePersistence(t *testing.T) {
 	var origin, challenge, redirect string
 	exchanges := 0
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -109,7 +109,7 @@ func TestHostedLoginRealLoopbackPKCEAndPrivatePersistence(t *testing.T) {
 		}
 		return nil
 	}
-	if err := c.login(context.Background(), origin, false); err != nil {
+	if err := c.run(context.Background(), []string{"login", "--url", origin, "--loopback"}); err != nil {
 		t.Fatal(err)
 	}
 	if exchanges != 1 {
