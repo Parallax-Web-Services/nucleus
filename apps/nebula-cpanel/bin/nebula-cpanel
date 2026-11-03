@@ -1,0 +1,8 @@
+#!/usr/local/cpanel/3rdparty/bin/perl
+use strict;use warnings;use FindBin;use lib "$FindBin::RealBin/../lib";use Getopt::Long qw(GetOptions);use Parallax::NebulaCPanel::Installer;
+my($plan,$check,$install,$uninstall,$portal,$profile,$help,$notification_ack);
+GetOptions('plan'=>\$plan,'check'=>\$check,'install'=>\$install,'uninstall'=>\$uninstall,'portal-url=s'=>\$portal,'profile=s'=>\$profile,'acknowledge-registration-notification'=>\$notification_ack,'help'=>\$help) or die "Invalid arguments; use --help\n";
+if($help){print "NEBULA optional cPanel/WHM navigation package (local preparation, 0.1.3-dev)\nUsage: perl bin/nebula-cpanel --plan|--check|--install --portal-url https://nebula.example --profile /root/reviewed-host-profile.json [--acknowledge-registration-notification]\n       perl bin/nebula-cpanel --uninstall --profile /root/reviewed-host-profile.json\nVendor registration rebuilds shared menus/caches, may reload/start cpsrvd, and sends a new-registration notification. No system packages, cluster credentials or account binding are changed.\n";exit 0;}
+die "Choose exactly one operation\n" unless ($plan//0)+($check//0)+($install//0)+($uninstall//0)==1 && !@ARGV;
+my $s=Parallax::NebulaCPanel::Installer->new(package=>"$FindBin::RealBin/..");my $r=eval{$uninstall?$s->uninstall(profile=>$profile):$install?$s->install(portal_url=>$portal,profile=>$profile,acknowledge_registration_notification=>$notification_ack):$s->plan(portal_url=>$portal,profile=>$profile)};
+if(!$r){print STDERR $@||"Operation failed\n";exit 1;}print $s->json($r)."\n";exit(($check && $r->{status} ne 'ready')?1:0);

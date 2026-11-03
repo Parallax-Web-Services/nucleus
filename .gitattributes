@@ -1,2 +1,3 @@
 tools/foundation/** -text
 tools/cluster-security/** -text
+apps/nebula-cpanel/** -text
