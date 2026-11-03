@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "origin_name": "nebula-alpha-preflight.py",
+      "reference_path": "reference/alpha-20261102/host-preflight.py.reference",
+      "sha256": "f7d216b1aa1e803e9386b227f2954604c6746dddb1c63847c662b7f04c9f33f4",
+      "bytes": 11521,
+      "status": "archival_not_loaded"
+    },
+    {
+      "origin_name": "nebula-alpha-lifecycle.py",
+      "reference_path": "reference/alpha-20261102/host-lifecycle.py.reference",
+      "sha256": "6b4ae6d7be5ed6a21db251c8da6e103c251da803819fa820e788cdb7abfcad90",
+      "bytes": 47449,
+      "status": "archival_not_loaded"
+    },
+    {
+      "origin_name": "nebula-alpha-health-refresher.py",
+      "reference_path": "reference/alpha-20261102/fleet-health.py.reference",
+      "sha256": "a1d38096bbc7bffdaf549c265f0d4b65e0ab20334862877137ebd56dac0d8ac7",
+      "bytes": 9007,
+      "status": "archival_not_loaded"
+    },
+    {
+      "origin_name": "nebula-guest-bootstrap.py",
+      "reference_path": "reference/alpha-20261102/guest-bootstrap.py.reference",
+      "sha256": "aeb06bcc378cf41be549b9a2f381f4d67f656c5ee8af2caea57aef6dd694950f",
+      "bytes": 19822,
+      "status": "archival_not_loaded"
+    },
+    {
+      "origin_name": "nebula-guest-kubelet-authority-completion.py",
+      "reference_path": "reference/alpha-20261102/guest-cluster.py.reference",
+      "sha256": "7fe61c84b6e5167be8658e66c70063463f52baa7cc0de401f9bb83257242612c",
+      "bytes": 75102,
+      "status": "archival_not_loaded"
+    },
+    {
+      "origin_name": "verify_official_packages.py",
+      "package_path": "provenance/verify_official_packages.py",
+      "sha256": "1602a1f96b8187e52ca84b0562e3bb96372dabfee048c1bc4bc594e59f31162d",
+      "bytes": 4949,
+      "status": "reviewed_public_dependency"
+    },
+    {
+      "origin_name": "control-plane-images.lock.json",
+      "package_path": "locks/kubernetes-v1.37.1-linux-amd64.json",
+      "sha256": "59eaf04dd9ea8c8b3c434979073e5b2bf5db084730f1d27a50b0a5b3e8f13f1a",
+      "bytes": 15929,
+      "status": "reviewed_public_dependency"
+    },
+    {
+      "origin_name": "calico-image-pins.json",
+      "package_path": "locks/calico-v3.33.0-images.json",
+      "sha256": "1018f6097ff2dc087390c7743d7828cc78880e367af0823dbc9be74ecd80ba1c",
+      "bytes": 428,
+      "status": "reviewed_public_dependency"
+    },
+    {
+      "origin_name": "calico-3.33.0-nebula.yaml",
+      "package_path": "locks/calico-v3.33.0-nebula.yaml",
+      "sha256": "6927c2d2c7a6de627a8df06c3097883121225d32c8bcec3f52d2ecf921dcdd1b",
+      "bytes": 729774,
+      "status": "reviewed_public_dependency"
+    }
+  ],
+  "private_data_included": false
+}

@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""WSL-only existing-fleet health refresher. No image/VM/service operations."""
+from __future__ import annotations
+import argparse,fcntl,json,os,re,signal,stat,subprocess,sys,time,urllib.parse,urllib.request
+from pathlib import Path
+ROOT=Path('/mnt/wsl/projects/workspace/parallax/nucleus')
+BINARY='/opt/parallax/nebula/releases/8dfddeecc99527b530c959d2a4a778d9b9debbfa1dcf7a62a70e08bcd48ee4b1/nucleus'
+FIELDS={'schema_version','checked_at_unix','registered_node_count','known_online_count','same_fabric','managed_relay_binary_matches','managed_relay_process_unchanged'}
+class Refused(RuntimeError):pass
+def need(ok,code):
+ if not ok:raise Refused(code)
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+ def redirect_request(self,*args,**kwargs):return None
+def fetch_map(value):
+ u=urllib.parse.urlsplit(value);token=urllib.parse.parse_qs(u.fragment).get('token',[''])[0]
+ need(u.scheme=='http' and u.hostname=='127.0.0.1' and u.port and re.fullmatch('[a-f0-9]{64}',token),'existing_loopback_session_required')
+ request=urllib.request.Request('http://127.0.0.1:'+str(u.port)+'/api/v1/fabric',headers={'Authorization':'Bearer '+token})
+ opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect)
+ with opener.open(request,timeout=5) as response:
+  raw=response.read(4*1024*1024+1);need(response.status==200 and response.geturl()==request.full_url and len(raw)<=4*1024*1024,'bounded_fabric_response_required')
+ return json.loads(raw)
+def reduce_views(owner,member,expected):
+ known={n['node_id'] for n in expected['nodes']};a={n['node_id']:n for n in owner['nodes']};b={n['node_id']:n for n in member['nodes']}
+ return {'registered_node_count':len(a),'known_online_count':sum(a.get(n,{}).get('status')=='online' and b.get(n,{}).get('status')=='online' for n in known),
+ 'same_fabric':owner.get('fabric_id')==member.get('fabric_id')==expected['fabric_id'] and set(a)==set(b)==known}
+def relay_health():
+ remote=r"""
+from pathlib import Path
+import os,json,subprocess,stat
+path=Path('/var/lib/parallax-nebula-deploy/managed-issuer-ready.json')
+fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+try:
+ s=os.fstat(fd)
+ if not stat.S_ISREG(s.st_mode) or s.st_uid!=0 or stat.S_IMODE(s.st_mode)!=0o600 or s.st_size>128*1024:raise SystemExit('managed_metadata_guard')
+ raw=os.read(fd,128*1024+1);proof=json.loads(raw)
+finally:os.close(fd)
+r=subprocess.run(['systemctl','show','nebula-relay.service','--property=MainPID','--value'],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=3)
+out={'managed_relay_binary_matches':False,'managed_relay_process_unchanged':False}
+try:
+ pid=int(r.stdout);p=Path('/proc')/str(pid);ticks=(p/'stat').read_text().rsplit(') ',1)[1].split()[19]
+ out['managed_relay_binary_matches']=pid>1 and os.readlink(p/'exe')==BINARY
+ out['managed_relay_process_unchanged']=pid==proof['relay_process']['pid'] and ticks==str(proof['relay_process']['start_ticks']) and proof.get('status')=='passed'
+except Exception:pass
+print(json.dumps(out))
+""".replace('BINARY',repr(BINARY))
+ r=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=8','-o','ForwardAgent=no','-o','ClearAllForwardings=yes','-o','PermitLocalCommand=no','slipstream.host','python3','-'],input=remote,text=True,capture_output=True,timeout=15)
+ need(r.returncode==0,'relay_metadata_unavailable');out=json.loads(r.stdout)
+ need(set(out)=={'managed_relay_binary_matches','managed_relay_process_unchanged'} and all(type(v) is bool for v in out.values()),'relay_metadata_shape')
+ return out
+def payload(session,expected):
+ result={'schema_version':1,'checked_at_unix':int(time.time()),'registered_node_count':0,'known_online_count':0,'same_fabric':False,'managed_relay_binary_matches':False,'managed_relay_process_unchanged':False}
+ try:result.update(reduce_views(fetch_map(session['owner_map_url']),fetch_map(session['member_map_url']),expected))
+ except Exception:pass
+ try:result.update(relay_health())
+ except Exception:pass
+ result['checked_at_unix']=int(time.time());need(set(result)==FIELDS,'health_payload_scope');return result
+def store(target,run_id,value):
+ need(re.fullmatch('[a-f0-9]{12}',run_id) and set(value)==FIELDS,'health_binding')
+ remote=r"""
+from pathlib import Path
+import os,json,sys,stat,tempfile,fcntl,time
+work=Path('/var/lib/parallax-nebula-bootstrap')/('plan-'+RUN_ID)
+s=work.lstat()
+if work.resolve()!=work or not stat.S_ISDIR(s.st_mode) or s.st_uid!=0 or stat.S_IMODE(s.st_mode)!=0o700:raise SystemExit('private_operation_required')
+value=json.loads(sys.stdin.buffer.read(4097))
+expected={'schema_version','checked_at_unix','registered_node_count','known_online_count','same_fabric','managed_relay_binary_matches','managed_relay_process_unchanged'}
+if set(value)!=expected or type(value['schema_version']) is not int or value['schema_version']!=1 or type(value['checked_at_unix']) is not int or abs(time.time()-value['checked_at_unix'])>15:raise SystemExit('health_schema')
+if any(type(value[k]) is not bool for k in ['same_fabric','managed_relay_binary_matches','managed_relay_process_unchanged']):raise SystemExit('health_bool')
+if any(type(value[k]) is not int or not 0<=value[k]<=1000 for k in ['registered_node_count','known_online_count']):raise SystemExit('health_count')
+lockpath=work/'health-write.lock';lock=os.open(lockpath,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
+try:
+ ls=os.fstat(lock)
+ if not stat.S_ISREG(ls.st_mode) or ls.st_uid!=0 or stat.S_IMODE(ls.st_mode)!=0o600:raise SystemExit('health_lock')
+ fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+ target=work/'external-health.json'
+ def current():
+  if not os.path.lexists(target):return None
+  fd=os.open(target,os.O_RDONLY|os.O_NOFOLLOW)
+  try:
+   s=os.fstat(fd)
+   if not stat.S_ISREG(s.st_mode) or s.st_uid!=0 or stat.S_IMODE(s.st_mode)!=0o600 or s.st_nlink!=1 or s.st_size>4096:raise SystemExit('health_file')
+   raw=os.read(fd,4097)
+   return(s.st_dev,s.st_ino,s.st_mode,s.st_uid,s.st_gid,s.st_size,s.st_mtime_ns,s.st_ctime_ns,raw)
+  finally:os.close(fd)
+ before=current();fd,temp=tempfile.mkstemp(prefix='.health-',dir=work);owned=os.fstat(fd)
+ try:
+  with os.fdopen(fd,'w') as out:json.dump(value,out,separators=(',',':'));out.flush();os.fsync(out.fileno())
+  if current()!=before:raise SystemExit('health_concurrent_change')
+  if before is None:
+   os.link(temp,target,follow_symlinks=False);os.unlink(temp)
+  else:os.replace(temp,target)
+ finally:
+  try:
+   now=os.lstat(temp)
+   if(now.st_dev,now.st_ino)==(owned.st_dev,owned.st_ino):os.unlink(temp)
+  except FileNotFoundError:pass
+ print(json.dumps({'stored':True}))
+finally:os.close(lock)
+""".replace('RUN_ID',repr(run_id))
+ # Send only the eight whitelisted safe fields. Session credentials never enter this command.
+ import shlex
+ r=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=8','-o','ForwardAgent=no','-o','ClearAllForwardings=yes','-o','PermitLocalCommand=no',target,'python3 -c '+shlex.quote(remote)],input=json.dumps(value),text=True,capture_output=True,timeout=15)
+ need(r.returncode==0 and json.loads(r.stdout)=={'stored':True},'health_store_failed')
+def main():
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run-id',required=True);p.add_argument('--seconds',type=int,default=0);p.add_argument('--interval',type=int,default=15);a=p.parse_args()
+ need(re.fullmatch('[a-f0-9]{12}',a.run_id) and 0<=a.seconds<=3600 and a.interval==15,'bounded_refresher_arguments')
+ session=json.loads((ROOT/'.runtime/slipstream-prototype/session.json').read_bytes());alpha=json.loads((ROOT/'.runtime/rollout-alpha/session.json').read_bytes());target=alpha['ssh_target']
+ need(isinstance(target,str) and not target.startswith('-') and target.split('@')[-1]=='alpha.wphyperdrive.com','existing_owned_alpha_pin')
+ expected=json.loads((ROOT/'docs/validation/fleet-rollout.json').read_bytes());need(len(expected['nodes'])==5,'known_five_member_fleet')
+ lockpath=Path('/tmp')/('nebula-alpha-health-'+str(os.getuid())+'-'+a.run_id+'.lock');fd=os.open(lockpath,os.O_CREAT|os.O_RDWR|os.O_NOFOLLOW,0o600)
+ try:
+  st=os.fstat(fd);need(stat.S_ISREG(st.st_mode) and st.st_uid==os.getuid() and stat.S_IMODE(st.st_mode)==0o600,'local_refresher_lock');fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB)
+  deadline=time.monotonic()+a.seconds;updates=0
+  while True:
+   value=payload(session,expected);store(target,a.run_id,value);updates+=1
+   if not a.seconds or time.monotonic()+a.interval>deadline:
+    print(json.dumps({'status':'health_refresher_complete','updates':updates,'registered_node_count':value['registered_node_count'],'known_online_count':value['known_online_count'],'invariants_passed':value['same_fabric'] and value['managed_relay_binary_matches'] and value['managed_relay_process_unchanged']}));break
+   time.sleep(a.interval)
+ finally:os.close(fd)
+if __name__=='__main__':
+ try:main()
+ except KeyboardInterrupt:raise SystemExit(0)
+ except Exception as e:
+  print(json.dumps({'status':'refused','reason':str(e) if isinstance(e,Refused) else type(e).__name__}),file=sys.stderr);raise SystemExit(1)
+

@@ -1,0 +1,377 @@
+{
+  "schema_version": 1,
+  "kubernetes_version": "v1.37.1",
+  "architecture": "amd64",
+  "status": "official_https_digest_chain_verified",
+  "kubeadm_deb_sha256": "b7f399d83fcb8c619927042b4dcd06ba68757fb74f9d2baabc358a0e22032f92",
+  "images": [
+    {
+      "image": "registry.k8s.io/kube-apiserver:v1.37.1",
+      "index_digest": "sha256:e190f914a6cc21cab9268485d1ae7282fdeab1315ac64b668aa42d732fd1061d",
+      "linux_amd64_manifest_digest": "sha256:1f207ab66b1ca6579dd5bf1024396015ca2a0f638157a7741d2d88d7b3c82c51",
+      "config_digest": "sha256:82ae6c548117fbd112a45e1ae093211fdb53dda179b5b6f8f2d881dd463a572a",
+      "layer_digests": [
+        "sha256:a5789fc40e828c4e7467626e3f69ec5dea8e5da22fe660db8ae6d16f777b0bbf",
+        "sha256:990a9c434e5e0f11549a8d4a41a1991e621b04e30cd63269adbc97b1dc38fd7e",
+        "sha256:39dc083afc39bd8dc43d456fe7ff7d39292e593bb2769972c11bb2e5f9119386",
+        "sha256:bf7a4185f01524837d19abde915ffde84e64368b250f5b5e9f6f75aea62a11d4",
+        "sha256:2780920e5dbfbe103d03a583ed75345306e572ec5a48cb10361f046767d9f29a",
+        "sha256:7c12895b777bcaa8ccae0605b4de635b68fc32d60fa08f421dc3818bf55ee212",
+        "sha256:3214acf345c0cc6bbdb56b698a41ccdefc624a09d6beb0d38b5de0b2303ecaf4",
+        "sha256:52630fc75a18675c530ed9eba5f55eca09b03e91bd5bc15307918bbc1a7e7296",
+        "sha256:dd64bf2dd177757451a98fcdc999a339c35dee5d9872d8f4dc69c8f3c4dd0112",
+        "sha256:b839dfae01f66e15c6a8b63520557ed315bdfe036342fa7a0c537259f10d7a9a",
+        "sha256:dcaa5a89b0ccda4b283e16d0b4d0891cd93d5fe05c6798f7806781a6a2d84354",
+        "sha256:96ed2737ae312e0bc637b40783f7c2f23416cb72ca957aa01855f1614278e64b",
+        "sha256:6e10fc9c4a45174478928acd7b5cc37c2130a5a7eb497acb595d704e8f1bf74c",
+        "sha256:1e677224d9e973eef0efc3b0f34df71e4dab65f4bb4c0a80dbb35da0155d8ea8",
+        "sha256:29c347501f8b805a11f973d4fe29f07b11c83523d9863d968fabeb763f5d9cf8"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/kube-apiserver@sha256:e190f914a6cc21cab9268485d1ae7282fdeab1315ac64b668aa42d732fd1061d"
+    },
+    {
+      "image": "registry.k8s.io/kube-controller-manager:v1.37.1",
+      "index_digest": "sha256:d470c1b85aebb466e971c06239cc6a31a4ac337a78600cef80375a79a1be1641",
+      "linux_amd64_manifest_digest": "sha256:24366808a9bf9dfefb3aa171f0fadac61a1dde50a43e578c42eb3d8785cb606e",
+      "config_digest": "sha256:336e72df967a8c1b1a6b2746476baa9ced7ef89f031726ed3f925cfd2727e16a",
+      "layer_digests": [
+        "sha256:a5789fc40e828c4e7467626e3f69ec5dea8e5da22fe660db8ae6d16f777b0bbf",
+        "sha256:990a9c434e5e0f11549a8d4a41a1991e621b04e30cd63269adbc97b1dc38fd7e",
+        "sha256:39dc083afc39bd8dc43d456fe7ff7d39292e593bb2769972c11bb2e5f9119386",
+        "sha256:bf7a4185f01524837d19abde915ffde84e64368b250f5b5e9f6f75aea62a11d4",
+        "sha256:2780920e5dbfbe103d03a583ed75345306e572ec5a48cb10361f046767d9f29a",
+        "sha256:7c12895b777bcaa8ccae0605b4de635b68fc32d60fa08f421dc3818bf55ee212",
+        "sha256:3214acf345c0cc6bbdb56b698a41ccdefc624a09d6beb0d38b5de0b2303ecaf4",
+        "sha256:52630fc75a18675c530ed9eba5f55eca09b03e91bd5bc15307918bbc1a7e7296",
+        "sha256:dd64bf2dd177757451a98fcdc999a339c35dee5d9872d8f4dc69c8f3c4dd0112",
+        "sha256:b839dfae01f66e15c6a8b63520557ed315bdfe036342fa7a0c537259f10d7a9a",
+        "sha256:dcaa5a89b0ccda4b283e16d0b4d0891cd93d5fe05c6798f7806781a6a2d84354",
+        "sha256:96ed2737ae312e0bc637b40783f7c2f23416cb72ca957aa01855f1614278e64b",
+        "sha256:6e10fc9c4a45174478928acd7b5cc37c2130a5a7eb497acb595d704e8f1bf74c",
+        "sha256:be84ab736a35f431ce3d9796c09cb6146196ff22c80d8dc71d6f00b070377cfe",
+        "sha256:29c347501f8b805a11f973d4fe29f07b11c83523d9863d968fabeb763f5d9cf8"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/kube-controller-manager@sha256:d470c1b85aebb466e971c06239cc6a31a4ac337a78600cef80375a79a1be1641"
+    },
+    {
+      "image": "registry.k8s.io/kube-scheduler:v1.37.1",
+      "index_digest": "sha256:b6e2474a6c20309f0df1e7337364281fda95c6a0722259ba7f032a1e177d3f29",
+      "linux_amd64_manifest_digest": "sha256:e4fc6f552722518aaa7d6cddbb8b638df275a5adbc5d1e5d59276af52692fb2c",
+      "config_digest": "sha256:45eb9287e2328469fbc59ec896f82b013cb462514dacf586034b22d1931e4d16",
+      "layer_digests": [
+        "sha256:a5789fc40e828c4e7467626e3f69ec5dea8e5da22fe660db8ae6d16f777b0bbf",
+        "sha256:990a9c434e5e0f11549a8d4a41a1991e621b04e30cd63269adbc97b1dc38fd7e",
+        "sha256:39dc083afc39bd8dc43d456fe7ff7d39292e593bb2769972c11bb2e5f9119386",
+        "sha256:bf7a4185f01524837d19abde915ffde84e64368b250f5b5e9f6f75aea62a11d4",
+        "sha256:2780920e5dbfbe103d03a583ed75345306e572ec5a48cb10361f046767d9f29a",
+        "sha256:7c12895b777bcaa8ccae0605b4de635b68fc32d60fa08f421dc3818bf55ee212",
+        "sha256:3214acf345c0cc6bbdb56b698a41ccdefc624a09d6beb0d38b5de0b2303ecaf4",
+        "sha256:52630fc75a18675c530ed9eba5f55eca09b03e91bd5bc15307918bbc1a7e7296",
+        "sha256:dd64bf2dd177757451a98fcdc999a339c35dee5d9872d8f4dc69c8f3c4dd0112",
+        "sha256:b839dfae01f66e15c6a8b63520557ed315bdfe036342fa7a0c537259f10d7a9a",
+        "sha256:dcaa5a89b0ccda4b283e16d0b4d0891cd93d5fe05c6798f7806781a6a2d84354",
+        "sha256:96ed2737ae312e0bc637b40783f7c2f23416cb72ca957aa01855f1614278e64b",
+        "sha256:6e10fc9c4a45174478928acd7b5cc37c2130a5a7eb497acb595d704e8f1bf74c",
+        "sha256:ffea8418528e170f1cd39600d71158e7e7f1359ee34f516480604b96df062d26",
+        "sha256:29c347501f8b805a11f973d4fe29f07b11c83523d9863d968fabeb763f5d9cf8"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/kube-scheduler@sha256:b6e2474a6c20309f0df1e7337364281fda95c6a0722259ba7f032a1e177d3f29"
+    },
+    {
+      "image": "registry.k8s.io/kube-proxy:v1.37.1",
+      "index_digest": "sha256:b9ae667ed9c160c9d5b66f55e8afec97fc5483a12db0ada5286541b0385cb9f4",
+      "linux_amd64_manifest_digest": "sha256:abbadc84931b520750bcda3350819f6a828ee44a4a0cab548a26016aa7e2a3b7",
+      "config_digest": "sha256:728902c90c8b555afa3fdb372f31c83f932a8c6369d37b44dea9e8ddc835d42e",
+      "layer_digests": [
+        "sha256:72d7b2282dab2dc4b40112243d5b99c34d2383f3c2c5dc6b5234d7f381fea7ca",
+        "sha256:d3e38ff086beb794a7fe1b4eee00d8917cf2474d6ad21be5f53563bcfc4b15ef",
+        "sha256:29c347501f8b805a11f973d4fe29f07b11c83523d9863d968fabeb763f5d9cf8"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/kube-proxy@sha256:b9ae667ed9c160c9d5b66f55e8afec97fc5483a12db0ada5286541b0385cb9f4"
+    },
+    {
+      "image": "registry.k8s.io/coredns/coredns:v1.14.6",
+      "index_digest": "sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea",
+      "linux_amd64_manifest_digest": "sha256:1ba6f47265602e2e50a9c4669e3a955e4298a0d30dc82f39293d4bf1a851e0ff",
+      "config_digest": "sha256:520212b8b0fcd9309d7362d592f513b72880fa5a4e9e8b91442e7ee3b622c6a9",
+      "layer_digests": [
+        "sha256:3f53d10a360b3144d3f4e0e6e61dd6e8a4b8334af1ee16d47709e675a53a7ee5",
+        "sha256:2e4cf50eeb92ac3a7afe75e15d96a26dee99449f86b46c75b5d95f4418a5bca0",
+        "sha256:c36c4b61cfbac73652d6a28923cd773657fa593c6ba5634672941f33bd8b3656",
+        "sha256:e1089d61b200106053b1717881bf0c1c47551478f01569d9224d33cccf3e4692",
+        "sha256:0f8b424aa0b96c1c388a5fd4d90735604459256336853082afb61733438872b5",
+        "sha256:d557676654e572af3e3173c90e7874644207fda32cd87e9d3d66b5d7b98a7b21",
+        "sha256:d82bc7a76a838c9a4a6025192429c2fed58f73742ef1fb9c8bb7b995fc3b7213",
+        "sha256:68e4cd60e60fed4486d5b4b40b079e57781e828d93d80a7411e8760dcccfbbf7",
+        "sha256:0783a66ae7492bb16937c7723c534e431404aa3ebbdcaaed65d264a95a266b9e",
+        "sha256:efae86a3fb38e05e6e2584bc2f48534a0d82f8d9e9a4163d04885d5c65423105",
+        "sha256:6b72b81ed96620b324f40ade069bbd3fcee69d62182bb03681c3976b6909eec4",
+        "sha256:6cdd517ba90571b01009637268b5fddb4e3eea409bb6dae0bf40ed8ad9e33ef4",
+        "sha256:c26e0ce0146d8ce9552e9c7490c53761f23e896d580fa6edd51da33665192e9b"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/coredns/coredns@sha256:900f9c109f7a33545d3c811516e8376df9019147b750f5ce3e254468769176ea"
+    },
+    {
+      "image": "registry.k8s.io/pause:3.10.2",
+      "index_digest": "sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4",
+      "linux_amd64_manifest_digest": "sha256:412c4a7219cb8a299a37337f3d87810c5340095322e15594a1637785adad0f17",
+      "config_digest": "sha256:4a83b15d3ecfe0d916b2d0a7991bc2854a629b8097017c2ee1ff65b30ae4c07c",
+      "layer_digests": [
+        "sha256:81ede36234b06d9a16771d804ef81ea888e29f8c425a5269e3d55d34a1b128a8"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/pause@sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4"
+    },
+    {
+      "image": "registry.k8s.io/etcd:3.7.0-0",
+      "index_digest": "sha256:6ecefbe2510c4a30573a62a4d6dd175acf881ca67003fcd91849a16df7a724d5",
+      "linux_amd64_manifest_digest": "sha256:1f445fa5dd06b08f3c0cf9f46e2891e9bc66cbf7e0b9c66627c40658edf4bc98",
+      "config_digest": "sha256:270fbeb69717150d82de2f31e6d6a93a6a60f8843d63df68cebe33c4b59c5f78",
+      "layer_digests": [
+        "sha256:875ea9878944f3daf508d0e1b87b39ebc1ecce3ccaf3ed11a3cc59f1852a540a",
+        "sha256:bfb59b82a9b65e47d485e53b3e815bca3b3e21a095bd0cb88ced9ac0b48062bf",
+        "sha256:39dc083afc39bd8dc43d456fe7ff7d39292e593bb2769972c11bb2e5f9119386",
+        "sha256:bf7a4185f01524837d19abde915ffde84e64368b250f5b5e9f6f75aea62a11d4",
+        "sha256:b6824ed73363f94b3b2b44084c51c31bc32af77a96861d49e16f91e3ab6bed71",
+        "sha256:7c12895b777bcaa8ccae0605b4de635b68fc32d60fa08f421dc3818bf55ee212",
+        "sha256:3214acf345c0cc6bbdb56b698a41ccdefc624a09d6beb0d38b5de0b2303ecaf4",
+        "sha256:52630fc75a18675c530ed9eba5f55eca09b03e91bd5bc15307918bbc1a7e7296",
+        "sha256:dd64bf2dd177757451a98fcdc999a339c35dee5d9872d8f4dc69c8f3c4dd0112",
+        "sha256:b839dfae01f66e15c6a8b63520557ed315bdfe036342fa7a0c537259f10d7a9a",
+        "sha256:dcaa5a89b0ccda4b283e16d0b4d0891cd93d5fe05c6798f7806781a6a2d84354",
+        "sha256:069d1e267530c2e681fbd4d481553b4d05f98082b18fafac86e7f12996dddd0b",
+        "sha256:127b996dd5971bc6ff9c3324157efece08ce15af2fe4b14682e63fbefc57d251",
+        "sha256:4c557850794757a6b856a732741da52dea6c1c2ab7cc2b2e7782a24b76c5aa99",
+        "sha256:3288a117248abccbd2588be777cc65a68fd64d3a72a9539caabce79b9af56aeb",
+        "sha256:dd8944595dfb226bf07cecc61298dfa55ecb4a8141b86eade3220a435a563c79",
+        "sha256:cef6d7de07c02da86c297c3257e2acf96123bfeeafff8a106f43beb332dccac6"
+      ],
+      "checks": [
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "manifests",
+          "host": "us-east1-docker.pkg.dev",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        },
+        {
+          "kind": "blobs",
+          "host": "cdn.registry.k8s.io",
+          "checks": {
+            "size": true,
+            "header": true,
+            "chain": true,
+            "origin": true
+          }
+        }
+      ],
+      "immutable_image": "registry.k8s.io/etcd@sha256:6ecefbe2510c4a30573a62a4d6dd175acf881ca67003fcd91849a16df7a724d5"
+    }
+  ],
+  "installed_or_started": false,
+  "trust": "Tags listed by the signed official kubeadm package; HTTPS official registry redirect to observed Google Artifact Registry; index, platform manifest and config digests verified."
+}

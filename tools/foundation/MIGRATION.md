@@ -1,0 +1,11 @@
+# Refactor checkpoint and coverage
+
+Five source snapshots are byte-exact and archival. Active host preflight/lifecycle, guest bootstrap/cluster and safe-health code remove installation-local loading/defaults while retaining reviewed primitive guards. Public dependency bytes are unchanged. The source manifest pins the entire package and declared source graph; it does not attest a running deployment.
+
+The original host 5+37 cases are retained with 17 explicit-context/phase-lock cases. Bootstrap 14 and initial cluster 20 cases target final modules. Completion 9, historical authority 12 and probe 11 cases target the same final cluster implementation. Historical source-to-source assertions now compare untouched guarded methods against the allowed final reference snapshot, or assert the final least-privilege behavior. No excluded earlier helper variant is imported or bundled. Old installation identifiers in active fixtures are replaced by explicit synthetic values.
+
+The prior real downloaded-archive fixture is replaced by generated complete/invalid archive inventories. This retains parser/custody rejection coverage while explicitly not establishing upstream binary/signature/guest acceptance. The corrected kubeadm skip phases retain both bootstrap-token and show-join-command, with a regression for the original dependency error. Probe policies retain dropALL and only the explicitly reviewed NET_BIND_SERVICE exception.
+
+Current portability limits: only the named Noble/amd64 fixed-resource libvirt/private-single-control-plane profile is modeled. There is no operational public CLI, lifecycle rollout/transport adapter, generic HA or architecture expansion, worker join distribution, backup integration, reboot acceptance or production reuse claim. The later durability-completion v2 source/41 fixtures are newly allowlisted but not yet ported into this checkpoint. Existing deployed Alpha operations and private ledgers cannot be silently adopted by the new context-bound APIs. A fresh independently reviewed operator-local installation and disposable-guest acceptance are separate work.
+
+The checkpoint must pass its actual integrated tests before being labeled tested; the final review receipt records the achieved result and any remaining failures rather than treating case counts as pass claims.

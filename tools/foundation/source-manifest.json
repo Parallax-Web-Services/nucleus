@@ -1,0 +1,224 @@
+{
+  "files": [
+    {
+      "bytes": 2316,
+      "path": "MIGRATION.md",
+      "sha256": "c3e6f2bb93efef80a0d8248aa5ca4243452e8cfce477a803cc574bbfe27c9f40"
+    },
+    {
+      "bytes": 3575,
+      "path": "README.md",
+      "sha256": "8bd0270876c225d5c396d19c049a74d7ae43a0f1901b5732b0738414b05214f4"
+    },
+    {
+      "bytes": 73,
+      "path": "__init__.py",
+      "sha256": "0af678bbcd644d9c12c2327d57f9dc9c5a07e82c949c45b9fcc614fa4e7024d8"
+    },
+    {
+      "bytes": 764,
+      "path": "__main__.py",
+      "sha256": "338be4469b54d9387db92dc79b8719485d58560b88b8f66be6f1e6a7bf9bd48b"
+    },
+    {
+      "bytes": 0,
+      "path": "adapters/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 6615,
+      "path": "adapters/nucleus_fleet_health.py",
+      "sha256": "324330cd5fae6cb9e9e9cc02cad59cc8ab2e0f442ca5c9d3cbefbe77f43a6bc2"
+    },
+    {
+      "bytes": 1853,
+      "path": "build_manifest.py",
+      "sha256": "0bdcefbef532db6c594452720078add091eae8662f547fb6574778af2d98cdf2"
+    },
+    {
+      "bytes": 14230,
+      "path": "framework.py",
+      "sha256": "faf55c0bb4376a2ab49c78ccc7149f2b32391d13ab197e3d046d4db4971e2290"
+    },
+    {
+      "bytes": 0,
+      "path": "guest/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 20810,
+      "path": "guest/bootstrap.py",
+      "sha256": "b0138b101a4d9827c10857fd7500ed5788bc7e5eae445dbbd639f8e7866c2cbb"
+    },
+    {
+      "bytes": 75423,
+      "path": "guest/cluster.py",
+      "sha256": "a7d1811a8bbef146fc0bd6d58cc92e0c9f210dcb34ad63e39b610dc8ce2af629"
+    },
+    {
+      "bytes": 57,
+      "path": "host/__init__.py",
+      "sha256": "a8b7cc31729038499e5f8249cc4b2ffcef087138651510f0763f6d2b727ec9ad"
+    },
+    {
+      "bytes": 49410,
+      "path": "host/lifecycle.py",
+      "sha256": "1059b8a4ef71cc7e209bc247ecbfb5a69dfca7a718f9950aed059245d10659a2"
+    },
+    {
+      "bytes": 12356,
+      "path": "host/preflight.py",
+      "sha256": "a4c00093d6381203beb6d2f3e634914f0854a23a8456ecf5ae56b87c7886fdd8"
+    },
+    {
+      "bytes": 428,
+      "path": "locks/calico-v3.33.0-images.json",
+      "sha256": "1018f6097ff2dc087390c7743d7828cc78880e367af0823dbc9be74ecd80ba1c"
+    },
+    {
+      "bytes": 729774,
+      "path": "locks/calico-v3.33.0-nebula.yaml",
+      "sha256": "6927c2d2c7a6de627a8df06c3097883121225d32c8bcec3f52d2ecf921dcdd1b"
+    },
+    {
+      "bytes": 15929,
+      "path": "locks/kubernetes-v1.37.1-linux-amd64.json",
+      "sha256": "59eaf04dd9ea8c8b3c434979073e5b2bf5db084730f1d27a50b0a5b3e8f13f1a"
+    },
+    {
+      "bytes": 1144,
+      "path": "profiles/noble-amd64-single-v1.json",
+      "sha256": "ab8516cedfb2b64dd0a07e49c9536c53c688c4809d0a3b626cb3ad588ad9776a"
+    },
+    {
+      "bytes": 2640,
+      "path": "provenance/reference-sources.json",
+      "sha256": "cd6134509f856157c3efc501693abac3e83a7e80cd0743f2df04fd6c70fa60e0"
+    },
+    {
+      "bytes": 4949,
+      "path": "provenance/verify_official_packages.py",
+      "sha256": "1602a1f96b8187e52ca84b0562e3bb96372dabfee048c1bc4bc594e59f31162d"
+    },
+    {
+      "bytes": 565,
+      "path": "reference/README.md",
+      "sha256": "b53bf41daf2c23008e80244c1a5a1f4533dbcb0ac1095cd991ba46cd6cdc4c13"
+    },
+    {
+      "bytes": 9007,
+      "path": "reference/alpha-20261102/fleet-health.py.reference",
+      "sha256": "a1d38096bbc7bffdaf549c265f0d4b65e0ab20334862877137ebd56dac0d8ac7"
+    },
+    {
+      "bytes": 19822,
+      "path": "reference/alpha-20261102/guest-bootstrap.py.reference",
+      "sha256": "aeb06bcc378cf41be549b9a2f381f4d67f656c5ee8af2caea57aef6dd694950f"
+    },
+    {
+      "bytes": 75102,
+      "path": "reference/alpha-20261102/guest-cluster.py.reference",
+      "sha256": "7fe61c84b6e5167be8658e66c70063463f52baa7cc0de401f9bb83257242612c"
+    },
+    {
+      "bytes": 47449,
+      "path": "reference/alpha-20261102/host-lifecycle.py.reference",
+      "sha256": "6b4ae6d7be5ed6a21db251c8da6e103c251da803819fa820e788cdb7abfcad90"
+    },
+    {
+      "bytes": 11521,
+      "path": "reference/alpha-20261102/host-preflight.py.reference",
+      "sha256": "f7d216b1aa1e803e9386b227f2954604c6746dddb1c63847c662b7f04c9f33f4"
+    },
+    {
+      "bytes": 0,
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1279,
+      "path": "tests/support.py",
+      "sha256": "a6550f33902786bdd7f52f7ac68180c2921a5139c088bbbf68c90046974d97bb"
+    },
+    {
+      "bytes": 10552,
+      "path": "tests/test_cluster_authority.py",
+      "sha256": "a5e97ec35006e4f0f592b0555aeb0a7eef09ae55dff4ec75cde734b363b41d68"
+    },
+    {
+      "bytes": 11867,
+      "path": "tests/test_cluster_completion.py",
+      "sha256": "d0937ac9b2f2258f12ab6fd75025de22f7a8f1f65d13b986566e04f8374ca0a6"
+    },
+    {
+      "bytes": 11155,
+      "path": "tests/test_cluster_probe.py",
+      "sha256": "5ab5f8798acd381a64a110cb72c71094a92205e3eb6d8c53c69a1ccf279cb370"
+    },
+    {
+      "bytes": 16260,
+      "path": "tests/test_framework.py",
+      "sha256": "ceffc66b2134cc73f0ec162a24841f5269dba48fe57166e940ea602f4f00eedf"
+    },
+    {
+      "bytes": 9597,
+      "path": "tests/test_guest_bootstrap.py",
+      "sha256": "0c530b2e3d85264d7a766386ab5e42ee1e1219826f3cd6990d2f32367d15c895"
+    },
+    {
+      "bytes": 15940,
+      "path": "tests/test_guest_policy.py",
+      "sha256": "cfd866451e984c3a1750def8499ebd3d8360c08d4b5cdfed4bdd734909fa5c39"
+    },
+    {
+      "bytes": 4120,
+      "path": "tests/test_health.py",
+      "sha256": "79d99813e6cc811c84685b2f03a3fd5817fa61e6a1854c674bbfdd4e2008c55c"
+    },
+    {
+      "bytes": 41130,
+      "path": "tests/test_host_lifecycle.py",
+      "sha256": "8331aaca6abd4eb3ed28b4cceac7a19b464b8955204917b6b1574096407765a8"
+    },
+    {
+      "bytes": 7075,
+      "path": "tests/test_host_preflight.py",
+      "sha256": "6059b4abeabd0c3e4695a93af225460822eaec08b77831438c63d8d6da088b38"
+    }
+  ],
+  "modules": {
+    "adapters/fleet-health": {
+      "path": "adapters/nucleus_fleet_health.py",
+      "requires": []
+    },
+    "guest/bootstrap": {
+      "path": "guest/bootstrap.py",
+      "requires": [
+        "provenance/verifier"
+      ]
+    },
+    "guest/cluster": {
+      "path": "guest/cluster.py",
+      "requires": [
+        "guest/bootstrap"
+      ]
+    },
+    "host/lifecycle": {
+      "path": "host/lifecycle.py",
+      "requires": [
+        "host/preflight"
+      ]
+    },
+    "host/preflight": {
+      "path": "host/preflight.py",
+      "requires": []
+    }
+  },
+  "package": "nebula-foundation-source",
+  "profile": "profiles/noble-amd64-single-v1.json",
+  "schema_version": 1,
+  "scripts": {
+    "provenance/verifier": "provenance/verify_official_packages.py"
+  },
+  "status": "source_only_not_live_accepted"
+}

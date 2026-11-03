@@ -1,0 +1,47 @@
+{
+  "capabilities": {
+    "arm64": false,
+    "ha": false,
+    "public_installer": false,
+    "worker_enrollment": false
+  },
+  "cluster": {
+    "api_port": 6443,
+    "control_plane_count": 1,
+    "cri": "unix:///run/containerd/containerd.sock",
+    "dns_domain": "cluster.local",
+    "pod_cidr": "10.244.0.0/16",
+    "service_cidr": "10.96.0.0/12",
+    "version": "v1.37.1"
+  },
+  "id": "noble-amd64-single-v1",
+  "libvirt": {
+    "network_kind": "nat",
+    "pool_kind": "dir",
+    "qemu": "/usr/bin/qemu-system-x86_64",
+    "uri": "qemu:///system",
+    "virsh": "/usr/bin/virsh"
+  },
+  "limits": {
+    "max_fleet_members": 128,
+    "max_protected_domains": 128
+  },
+  "platform": {
+    "architecture": "amd64",
+    "codename": "noble",
+    "machine": "x86_64",
+    "os": "ubuntu",
+    "version": "24.04"
+  },
+  "resources": {
+    "host_cpu_reserve": 2,
+    "host_disk_reserve_bytes": 10737418240,
+    "host_ram_reserve_bytes": 2147483648,
+    "image_staging_reserve_bytes": 2147483648,
+    "memory_bytes": 4294967296,
+    "raw_disk_bytes": 21474836480,
+    "vcpus": 2
+  },
+  "schema_version": 1,
+  "status": "source_only_not_live_accepted"
+}

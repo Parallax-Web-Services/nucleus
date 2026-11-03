@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Alpha-only NEBULA VM preflight. No VM/package/service mutation commands exist."""
+from __future__ import annotations
+import argparse,base64,fcntl,hashlib,ipaddress,json,os,re,shutil,socket,stat,subprocess,sys,uuid,xml.etree.ElementTree as ET
+from pathlib import Path
+GIB=1024**3
+VM_BYTES=4*GIB
+DISK_BYTES=20*GIB
+HOST_RAM_RESERVE=2*GIB
+HOST_DISK_RESERVE=10*GIB
+IMAGE_STAGING_RESERVE=2*GIB
+VM_CPUS=2
+HOST_CPU_RESERVE=2
+VIRSH='/usr/bin/virsh'
+READONLY_VERBS={'list','dominfo','domuuid','domstate','domblklist','net-info','net-uuid','net-dumpxml','pool-info','pool-uuid','pool-dumpxml','vol-list'}
+PUBLIC_PINS={
+ 'ubuntu':{'version':'24.04 LTS','serial':'20261017','architecture':'amd64','url':'https://cloud-images.ubuntu.com/releases/noble/release-20261017/ubuntu-24.04-server-cloudimg-amd64.img','sha256':'04e8f2461a16a44e78a370284471f29616cdd9baf1893df25807b71f985b6c94','checksums_url':'https://cloud-images.ubuntu.com/releases/noble/release-20261017/SHA256SUMS','signature_url':'https://cloud-images.ubuntu.com/releases/noble/release-20261017/SHA256SUMS.gpg','signer_fingerprint':'D2EB44626FDDC30B513D5BB71A5D6C4C7DB87C81'},
+ 'kubernetes':{'version':'v1.37.1','deb_version':'1.37.1-1.1','repo':'https://pkgs.k8s.io/core:/stable:/v1.37/deb/','release_key_url':'https://pkgs.k8s.io/core:/stable:/v1.37/deb/Release.key'},
+ 'containerd':{'version':'2.3.7','url':'https://github.com/containerd/containerd/releases/download/v2.3.7/containerd-2.3.7-linux-amd64.tar.gz','sha256':'09a1b669ac6d21e7e24c3c33a9805b48987ba5845e8d88f039c47013a0c0025c','attestation_url':'https://github.com/containerd/containerd/releases/download/v2.3.7/containerd-2.3.7-attestation.intoto.jsonl'},
+ 'runc':{'version':'1.5.2','url':'https://github.com/opencontainers/runc/releases/download/v1.5.2/runc.amd64','sha256':'599f6f94ff8c5057241eff0d54c3c74f95c34935b6457b33fe545defc61e9488','signature_url':'https://github.com/opencontainers/runc/releases/download/v1.5.2/runc.amd64.asc'}
+}
+class Refused(RuntimeError):pass
+def need(ok,code):
+ if not ok:raise Refused(code)
+def info(raw):return {key.strip():value.strip() for line in raw.decode().splitlines() if ':' in line for key,value in [line.split(':',1)]}
+def anchor(path):
+ s=path.lstat();return {'device':s.st_dev,'inode':s.st_ino,'mode':s.st_mode,'uid':s.st_uid,'gid':s.st_gid}
+def query(*args):
+ need(args and args[0] in READONLY_VERBS,'readonly_query_only')
+ r=subprocess.run([VIRSH,'--readonly','--connect','qemu:///system',*args],stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=10)
+ need(r.returncode==0,'libvirt_metadata_query_failed');return r.stdout
+def identifier(raw):
+ value=raw.decode().strip();need(str(uuid.UUID(value))==value,'invalid_libvirt_identity');return value
+def capacity(mem_available,mem_total,cpu_count,pool_available,existing_memory,existing_cpus):
+ return {'host_available_ram_fits':mem_available>=VM_BYTES+HOST_RAM_RESERVE,
+ 'preserves_all_configured_guest_ram':mem_total>=existing_memory+VM_BYTES+HOST_RAM_RESERVE,
+ 'preserves_all_configured_guest_cpu':cpu_count>=existing_cpus+VM_CPUS+HOST_CPU_RESERVE,
+ 'pool_reserves_full_disk_and_headroom':pool_available>=DISK_BYTES+HOST_DISK_RESERVE+IMAGE_STAGING_RESERVE}
+def gather(run_id,fetch=query):
+ need(re.fullmatch('[a-f0-9]{12}',run_id) is not None,'invalid_run_id')
+ need(os.geteuid()==0 and socket.gethostname().split('.')[0].lower()=='alpha','alpha_root_only')
+ name='nebula-control-'+run_id;volume=name+'.raw'
+ domains=[];memory=0;cpus=0
+ for old_name in fetch('list','--all','--name').decode().splitlines():
+  if not old_name.strip():continue
+  fields=info(fetch('dominfo',old_name));old_id=identifier(fetch('domuuid',old_name));state=fetch('domstate',old_name).decode().strip()
+  need(old_name!=name,'proposed_domain_exists')
+  ram=int(fields['Max memory'].split()[0])*1024;cpu=int(fields['CPU(s)']);memory+=ram;cpus+=cpu
+  # Existing guest disks are NEVER opened; record stable filesystem identity only.
+  disks=[]
+  for line in fetch('domblklist',old_name,'--details').decode().splitlines():
+   parts=line.split(None,3)
+   if len(parts)!=4 or parts[0] in ['Type','---'] or parts[1]!='disk' or parts[3]=='-':continue
+   path=Path(parts[3])
+   if path.is_absolute() and os.path.lexists(path):
+    disk={'source':str(path),'anchor':anchor(path)}
+    if path.is_symlink():disk['link_target']=os.readlink(path)
+    disks.append(disk)
+  domains.append({'name':old_name,'uuid':old_id,'state':state,'vcpus':cpu,'max_memory_bytes':ram,'disks':disks})
+ network_info=info(fetch('net-info','default'));network_id=identifier(fetch('net-uuid','default'));network_xml=ET.fromstring(fetch('net-dumpxml','default'))
+ forward=network_xml.find('forward');ip=network_xml.find('ip');bridge=network_xml.find('bridge')
+ need(forward is not None and forward.get('mode')=='nat' and ip is not None and bridge is not None,'private_nat_network_required')
+ gateway=ipaddress.ip_address(ip.get('address',''));need(gateway.version==4 and gateway.is_private,'private_ipv4_network_required')
+ netmask=ip.get('netmask') or ip.get('prefix');subnet=ipaddress.ip_network(str(gateway)+'/'+str(netmask),strict=False)
+ need(network_info.get('Active')=='yes' and network_info.get('Persistent')=='yes','existing_default_network_not_ready')
+ pool_info=info(fetch('pool-info','default','--bytes'));pool_id=identifier(fetch('pool-uuid','default'));pool_xml=ET.fromstring(fetch('pool-dumpxml','default'))
+ need(pool_xml.get('type')=='dir' and pool_info.get('State')=='running','active_directory_pool_required')
+ target=Path(pool_xml.findtext('target/path') or '/invalid');need(target.is_absolute() and target.resolve()==target and target.is_dir(),'unsafe_pool_target')
+ need(target.stat().st_uid==0 and stat.S_IMODE(target.stat().st_mode)&0o022==0,'unsafe_pool_target_permissions')
+ volume_names=[]
+ for line in fetch('vol-list','--pool','default').decode().splitlines():
+  line=line.strip()
+  if line and not line.startswith(('Name','---')):volume_names.append(line.split()[0])
+ need(volume not in volume_names and not os.path.lexists(target/volume),'proposed_volume_exists')
+ mem={}
+ for line in Path('/proc/meminfo').read_text().splitlines():
+  key,value=line.split(':',1);mem[key]=int(value.strip().split()[0])*1024
+ checks=capacity(mem['MemAvailable'],mem['MemTotal'],os.cpu_count() or 0,int(pool_info['Available']),memory,cpus)
+ checks['kvm_api_ready']=False
+ try:
+  fd=os.open('/dev/kvm',os.O_RDONLY|os.O_CLOEXEC)
+  try:checks['kvm_api_ready']=fcntl.ioctl(fd,0xAE00,0)==12
+  finally:os.close(fd)
+ except OSError:pass
+ checks['tools_ready']=all(shutil.which(x) for x in ['virsh','virt-install','qemu-img','genisoimage','gpgv','curl','ssh-keygen'])
+ checks['new_name_and_volume_absent']=True
+ processes=[]
+ for proc in Path('/proc').iterdir():
+  if not proc.name.isdecimal():continue
+  try:
+   if proc.stat().st_uid!=os.geteuid():continue
+   exe=os.readlink(proc/'exe')
+   if Path(exe).name!='nucleus':continue
+   ticks=(proc/'stat').read_text().rsplit(') ',1)[1].split()[19]
+   processes.append({'pid':int(proc.name),'start_ticks':ticks,'executable':exe,'executable_anchor':anchor(proc/'exe')})
+  except OSError:pass
+ need(len(domains)==1,'protected_guest_count_changed')
+ return {'schema_version':1,'host_label':'Alpha','run_id':run_id,'proposed_name':name,'proposed_volume':volume,'new_domain_uuid':str(uuid.uuid4()),'resources':{'vcpus':VM_CPUS,'memory_bytes':VM_BYTES,'raw_disk_bytes':DISK_BYTES,'host_ram_reserve_bytes':HOST_RAM_RESERVE,'host_disk_reserve_bytes':HOST_DISK_RESERVE,'image_staging_reserve_bytes':IMAGE_STAGING_RESERVE},
+ 'protected_domains':domains,'network':{'name':'default','uuid':network_id,'active':True,'persistent':True,'forward_mode':'nat','bridge':bridge.get('name'),'gateway':str(gateway),'subnet':str(subnet)},
+ 'pool':{'name':'default','uuid':pool_id,'path':str(target),'anchor':anchor(target),'existing_volume_names':volume_names},
+ 'protected_nucleus_processes':processes,'admission':checks,'public_artifact_pins':PUBLIC_PINS,
+ 'provenance_verification_performed':False,'apply_enabled':False,
+ 'required_external_invariants':['all_five_existing_fabric_members_online_before_and_after','existing_managed_nebula_relay_binary_and_process_unchanged'],
+ 'acceptance':['new_unique_domain_only','guest_ssh_key_created_on_Alpha_private0600','private_NAT_API_only','upstream_kubeadm_version_exact','control_plane_readyz_pass'],
+ 'remaining_acceptance':['supported_pinned_CNI_and_pod_DNS_smoke_test_before_cluster_ready_claim','no_HA_claim_for_one_control_plane']}
+def summary(plan):
+ return {'schema_version':1,'host_label':'Alpha','proposed_name':plan['proposed_name'],'proposed_volume':plan['proposed_volume'],'protected_existing_vm_count':len(plan['protected_domains']),
+ 'protected_existing_nucleus_process_count':len(plan['protected_nucleus_processes']),'network_name':'default','network_active_persistent_private_nat':True,'pool_name':'default','pool_directory_identity_captured':True,
+ 'admission':plan['admission'],'all_admission_checks_passed':all(plan['admission'].values()),'apply_enabled':False,'provenance_verification_performed':False}
+def public_ssh_key(value):
+ need(isinstance(value,str) and len(value)<1024 and '\n' not in value and '\r' not in value,'invalid_public_ssh_key')
+ parts=value.split()
+ need(len(parts)>=2 and parts[0]=='ssh-ed25519','ed25519_public_key_required')
+ try:raw=base64.b64decode(parts[1],validate=True)
+ except Exception:raise Refused('invalid_public_ssh_key') from None
+ need(len(raw)==51 and raw[:15]==bytes.fromhex('0000000b')+b'ssh-ed25519' and raw[15:19]==bytes.fromhex('00000020'),'invalid_public_ssh_key')
+ return parts[0]+' '+parts[1]
+def cloud_init(plan,ssh_key):
+ key=public_ssh_key(ssh_key)
+ data={'hostname':plan['proposed_name'],'manage_etc_hosts':True,'disable_root':True,'ssh_pwauth':False,
+ 'users':[{'name':'nebula','groups':['sudo'],'sudo':['ALL=(ALL) NOPASSWD:ALL'],'shell':'/bin/bash','lock_passwd':True,'ssh_authorized_keys':[key]}],
+ 'growpart':{'mode':'auto','devices':['/']},'resize_rootfs':True,
+ 'write_files':[{'path':'/etc/nebula/bootstrap.json','owner':'root:root','permissions':'0400','content':json.dumps({'schema_version':1,'run_id':plan['run_id'],'domain_uuid':plan['new_domain_uuid']})+'\n'}]}
+ # JSON is a YAML subset; no executable guest commands or private keys in this seed.
+ return ('#cloud-config\n'+json.dumps(data,sort_keys=True,indent=2)+'\n').encode(),(json.dumps({'instance-id':'nebula-'+plan['run_id'],'local-hostname':plan['proposed_name']})+'\n').encode()
+def capture(path,plan):
+ need(path.is_absolute() and path.parent.resolve()==path.parent and not os.path.lexists(path),'new_private_plan_directory_required')
+ parent=path.parent.lstat();need(stat.S_ISDIR(parent.st_mode) and parent.st_uid==0 and stat.S_IMODE(parent.st_mode)==0o700,'private_plan_parent_required')
+ path.mkdir(mode=0o700)
+ fd=os.open(path/'plan.json',os.O_CREAT|os.O_EXCL|os.O_WRONLY|os.O_NOFOLLOW,0o600)
+ with os.fdopen(fd,'w') as out:json.dump(plan,out,sort_keys=True,indent=2);out.flush();os.fsync(out.fileno())
+def main():
+ parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--run-id',required=True);parser.add_argument('--capture',type=Path);args=parser.parse_args()
+ os.umask(0o077);plan=gather(args.run_id)
+ if args.capture:capture(args.capture,plan)
+ print(json.dumps(summary(plan)))
+if __name__=='__main__':
+ try:main()
+ except Exception as error:
+  print(json.dumps({'status':'refused','reason':str(error) if isinstance(error,Refused) else type(error).__name__}),file=sys.stderr);raise SystemExit(1)
+
