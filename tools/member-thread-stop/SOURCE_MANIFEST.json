@@ -1,0 +1,100 @@
+{
+  "all_four_c_files_exact_reviewed_bytes": true,
+  "excluded_unsafe_predecessor": {
+    "included": false,
+    "operationally_usable": false,
+    "sha256": "e2202b8820b84148960e2c77b0afc500411628beab2d9c8127cc7dd8d8d93b05"
+  },
+  "files": {
+    ".gitattributes": {
+      "bytes": 10,
+      "sha256": "4b55df27427a92f6d00df92d98182d343b8fd288e4fb1d32329d519b6db2e824"
+    },
+    ".gitignore": {
+      "bytes": 8,
+      "sha256": "020c2606e8ed484089c2083e0be438b9d0736bee1558a6b76af0d58bd23f69cf"
+    },
+    "README.md": {
+      "bytes": 9673,
+      "sha256": "5e65e78a47645051f3da1c28a0c888abf449ad8ee6790158914d44e1961b7166"
+    },
+    "nebula-member-hidden-relation-fixture.c": {
+      "bytes": 4643,
+      "sha256": "799526c2b3187adf187f666f5e96653b30eab8bd3a48cb44142b0af78a34608c"
+    },
+    "nebula-member-thread-fixture-launch.c": {
+      "bytes": 1220,
+      "sha256": "461c06e2cc04963af7634abf8a18e5937a3733eefa02a6d88733b00aaf0df215"
+    },
+    "nebula-member-thread-fixture.c": {
+      "bytes": 4376,
+      "sha256": "ff0ba77a37e4d01c96730629612accc52ffa85680a666b616175544a5eeb68db"
+    },
+    "nebula-member-thread-stop.c": {
+      "bytes": 24490,
+      "sha256": "af91d46f361e61ee552eeda78c897e21f5c633b282cc93926c322740e83fbfc9"
+    },
+    "test_member_thread_stop.py": {
+      "bytes": 21871,
+      "sha256": "3bc447dd1f704eac8acb1c53f86f07aba968427f6bc98e1be0f5c607cc83a362"
+    }
+  },
+  "harness_portability": {
+    "bindings": {
+      "HELPER": "package/build/nebula-member-thread-stop-disposable",
+      "LAUNCH": "package/build/nebula-member-thread-fixture-launch",
+      "SOURCE": "package/nebula-member-thread-stop.c",
+      "TARGET": "package/build/nebula-member-thread-fixture-target",
+      "fixture_run_receipt": "package/build/fixture-runs.json",
+      "hidden_fixture": "package/build/nebula-member-hidden-relation-fixture"
+    },
+    "only_six_path_bindings_changed": true,
+    "original_sha256": "7c05d9c01fa92d9d17f2ad67618146fd57fa89f4899d2ae071046923fd7e186d",
+    "retained_sha256": "3bc447dd1f704eac8acb1c53f86f07aba968427f6bc98e1be0f5c607cc83a362",
+    "reverse_substitution_reproduces_original_bytes": true
+  },
+  "native_parent_commit": "9713fb4c3667c32905b968314c0d66e3adea91fd",
+  "reviewed_helper_sha256": "af91d46f361e61ee552eeda78c897e21f5c633b282cc93926c322740e83fbfc9",
+  "schema_version": 1,
+  "source_frames": [
+    {
+      "first_line": 41,
+      "last_line": 85,
+      "path": "nebula-member-thread-stop.c",
+      "purpose": "bounded watchdog and private file/FD custody"
+    },
+    {
+      "first_line": 98,
+      "last_line": 145,
+      "path": "nebula-member-thread-stop.c",
+      "purpose": "strict process/request parsing and production namespace"
+    },
+    {
+      "first_line": 155,
+      "last_line": 234,
+      "path": "nebula-member-thread-stop.c",
+      "purpose": "same-TGID acquisition, unconsumed stop checks and closed task inventory"
+    },
+    {
+      "first_line": 236,
+      "last_line": 245,
+      "path": "nebula-member-thread-stop.c",
+      "purpose": "known nonsignal detach checks"
+    },
+    {
+      "first_line": 247,
+      "last_line": 279,
+      "path": "nebula-member-thread-stop.c",
+      "purpose": "beforeimage guards, cancellation/commit boundary, single queue and result"
+    }
+  ],
+  "status": "source_reviewed_not_operationally_approved",
+  "test_scope": {
+    "actual_iota_or_linux_3_10_runtime_accepted": false,
+    "binaries_or_private_captures_in_source_package": false,
+    "modern_linux_x86_64_only_fixture_acceptance": true,
+    "no_existing_pid_or_remote_target_arguments": true,
+    "requires_root": true,
+    "tests": 35
+  }
+}
