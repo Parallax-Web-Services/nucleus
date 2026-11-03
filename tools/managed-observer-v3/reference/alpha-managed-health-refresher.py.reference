@@ -1,0 +1,103 @@
+#!/usr/bin/env python3
+"""SOURCE ONLY: bounded administrative reduced-proof transfer, never key copying.
+No VM/cluster/service/owner operations. Original Alpha plan/helper and legacy
+external-health.json remain unchanged. Not an autonomous transport service.
+"""
+import argparse,base64,json,os,re,subprocess,time
+REDUCER_SHA='922e9f5d3648ca1d6cb8f26b441abb454f62f05bd7ee8e66834ec82a002a5977'
+BRIDGE_SHA='dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab'
+REDUCER='/usr/local/lib/parallax-nebula/managed-alpha-health.py'
+BRIDGE='/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py'
+BASE_OVERLAY='/etc/parallax/nebula-health/managed-owner.json'
+BASE_SOURCE='/usr/local/lib/parallax-nebula/managed-health-overlay.py'
+class Refused(RuntimeError):pass
+def need(ok,label):
+ if not ok:raise Refused(label)
+BOOT="""from pathlib import Path
+import hashlib,json,os,stat,types
+os.umask(0o077);assert os.geteuid()==0
+p=Path(x['source']);fd=os.open(p,os.O_RDONLY|os.O_NOFOLLOW)
+try:
+ s=os.fstat(fd);assert p.resolve()==p and stat.S_ISREG(s.st_mode)and s.st_uid==s.st_gid==0 and stat.S_IMODE(s.st_mode)==0o600 and s.st_nlink==1 and s.st_size<=1048576
+ data=os.read(fd,1048577);keys=['st_dev','st_ino','st_mode','st_uid','st_gid','st_nlink','st_size','st_mtime_ns','st_ctime_ns'];assert all(getattr(s,k)==getattr(os.fstat(fd),k)==getattr(p.lstat(),k)for k in keys)and hashlib.sha256(data).hexdigest()==x['pin']
+finally:os.close(fd)
+m=types.ModuleType('approved_reduced_health');m.__file__=str(p);exec(compile(data,str(p),'exec'),m.__dict__)
+"""
+def code(source,pin,body,values):
+ payload={'source':source,'pin':pin,**values};return"import base64,json\nx=json.loads(base64.b64decode("+repr(base64.b64encode(json.dumps(payload).encode()).decode())+"))\n"+BOOT+body
+
+def remote(target,wire):
+ need(target=='slipstream.host'or re.fullmatch(r'(?:root@)?alpha\.wphyperdrive\.com',target)is not None,'existing_owned_target_required');p=subprocess.run(['ssh','-o','BatchMode=yes','-o','ConnectTimeout=5','-o','StrictHostKeyChecking=yes','-o','ControlMaster=no','-o','ControlPath=none','-o','ForwardAgent=no','-o','ClearAllForwardings=yes','-o','PermitLocalCommand=no','-T',target,'python3','-'],input=wire.encode(),stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,timeout=15);need(p.returncode==0 and len(p.stdout)<=16384,'reduced_health_transport_failed');return json.loads(p.stdout)
+
+def context(alpha,run_id):
+ return remote(alpha,code(BRIDGE,BRIDGE_SHA,"""plan=Path('/var/lib/parallax-nebula-bootstrap')/('plan-'+x['run_id'])/'plan.json'
+raw,record=m.read(plan);value=m.decode(raw);assert value['run_id']==x['run_id']and value['schema_version']==1
+print(json.dumps(record))
+""",{'run_id':run_id}))
+
+def collect(plan_record):
+ return remote('slipstream.host',code(REDUCER,REDUCER_SHA,"""out=m.check(Path(x['overlay']),Path(x['overlay_source']),x['original_plan_record'])
+print(json.dumps(out))
+""",{'overlay':BASE_OVERLAY,'overlay_source':BASE_SOURCE,'original_plan_record':plan_record}))
+
+STORE=r"""import fcntl,tempfile
+root=Path('/var/lib/parallax-nebula-bootstrap')/('plan-'+x['run_id']);s=root.lstat();assert root.resolve()==root and stat.S_ISDIR(s.st_mode)and s.st_uid==s.st_gid==0 and stat.S_IMODE(s.st_mode)==0o700
+plan=root/'plan.json';context=x['envelope']['original_plan_record'];assert m.read(plan)[1]==context
+m.health(x['envelope'],x['overlay_id'],require_ready=False,expected_plan_record=context)
+path=root/'managed-external-health.json';control=root/'.managed-health-publisher.json';lock=root/'.managed-health-write.lock'
+def record(p):return m.read(p,8192)[1]if os.path.lexists(p)else None
+before_output=record(path);before_control=record(control)
+if before_control is None:
+ assert before_output is None and not os.path.lexists(lock)
+ fd=os.open(lock,os.O_CREAT|os.O_EXCL|os.O_RDWR|os.O_NOFOLLOW,0o600)
+else:
+ assert before_output is not None and os.path.lexists(lock)
+ fd=os.open(lock,os.O_RDWR|os.O_NOFOLLOW)
+try:
+ st=os.fstat(fd);assert stat.S_ISREG(st.st_mode)and st.st_uid==st.st_gid==0 and stat.S_IMODE(st.st_mode)==0o600 and st.st_nlink==1 and st.st_size==0
+ fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB);lock_identity=m.identity(st);assert lock_identity==m.identity(lock.lstat())
+ if before_control is not None:
+  control_bytes,current=m.read(control,8192);assert current==before_control;known=m.decode(control_bytes)
+  assert set(known)=={'schema_version','original_plan_record','overlay_id','reducer_sha256','lock_identity','proof_record'}and type(known['schema_version'])is int and known['schema_version']==1
+  assert known['original_plan_record']==context and known['overlay_id']==x['overlay_id']and known['reducer_sha256']==m.REDUCER_SHA and known['lock_identity']==lock_identity and known['proof_record']==before_output
+ def guard(output,ctl):
+  assert record(path)==output and record(control)==ctl and m.identity(os.fstat(fd))==lock_identity==m.identity(lock.lstat())and m.read(plan)[1]==context
+ def put(target,data,expected,output,ctl):
+  guard(output,ctl);assert record(target)==expected and len(data)<=8192
+  if expected is None:return m.new_private(target,data)
+  out,name=tempfile.mkstemp(prefix='.managed-health-',dir=root);temp=Path(name);held=os.fstat(out)
+  try:
+   with os.fdopen(out,'wb')as stream:stream.write(data);stream.flush();os.fchmod(stream.fileno(),0o600);os.fsync(stream.fileno());staged=m.identity(os.fstat(stream.fileno()))
+   assert m.identity(temp.lstat())==staged and m.read(temp,8192)[0]==data;guard(output,ctl);assert record(target)==expected
+   os.replace(temp,target);value,after=m.read(target,8192);assert(after['identity']['st_dev'],after['identity']['st_ino'])==(held.st_dev,held.st_ino)and value==data;return after
+  finally:
+   try:
+    current=temp.lstat()
+    if(current.st_dev,current.st_ino)==(held.st_dev,held.st_ino):temp.unlink()
+   except FileNotFoundError:pass
+ guard(before_output,before_control);data=(json.dumps(x['envelope'],sort_keys=True)+'\n').encode();after_output=put(path,data,before_output,before_output,before_control)
+ # An interruption here intentionally leaves an unadoptable output. No later
+ # update can infer its ownership from contents or silently repair the sidecar.
+ guard(after_output,before_control);state={'schema_version':1,'original_plan_record':context,'overlay_id':x['overlay_id'],'reducer_sha256':m.REDUCER_SHA,'lock_identity':lock_identity,'proof_record':after_output};after_control=put(control,(json.dumps(state,sort_keys=True)+'\n').encode(),before_control,after_output,before_control);guard(after_output,after_control)
+ ready=True
+ try:m.health(x['envelope'],x['overlay_id'],expected_plan_record=context)
+ except m.Refused:ready=False
+ print(json.dumps({'stored':True,'ready':ready}))
+finally:os.close(fd)
+"""
+
+def store(alpha,run_id,overlay_id,plan_record,proof):
+ envelope={'schema_version':1,'transport':'authenticated-administrative-ssh','reducer_sha256':REDUCER_SHA,'original_plan_record':plan_record,'health':proof};return remote(alpha,code(BRIDGE,BRIDGE_SHA,STORE,{'run_id':run_id,'overlay_id':overlay_id,'envelope':envelope}))
+def once(alpha,run_id,overlay_id):
+ record=context(alpha,run_id);proof=collect(record);need(proof.get('schema_version')==2 and proof.get('observation_basis')=='managed-owner-view'and proof.get('overlay_id')==overlay_id,'reduced_health_binding_differs');result=store(alpha,run_id,overlay_id,record,proof);need(set(result)=={'stored','ready'}and result['stored']is True and type(result['ready'])is bool,'reduced_health_store_failed');return result
+
+def main():
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--alpha-target',required=True);p.add_argument('--run-id',required=True);p.add_argument('--managed-overlay-id',required=True);p.add_argument('--seconds',type=int,default=0);a=p.parse_args();need(re.fullmatch(r'(?:root@)?alpha\.wphyperdrive\.com',a.alpha_target)is not None and re.fullmatch('[a-f0-9]{12}',a.run_id)is not None and re.fullmatch('[a-f0-9]{32}',a.managed_overlay_id)is not None and 0<=a.seconds<=600,'bounded_owned_proof_arguments_required');deadline=time.monotonic()+a.seconds;updates=0
+ while True:
+  result=once(a.alpha_target,a.run_id,a.managed_overlay_id);updates+=1
+  if not a.seconds or time.monotonic()+2>deadline:break
+  time.sleep(2)
+ print(json.dumps({'status':'proof_refresher_complete','updates':updates,'ready':result['ready'],'observation_basis':'managed-owner-view','credentials_or_plan_record_emitted':False}))
+if __name__=='__main__':
+ try:main()
+ except Exception as e:print(json.dumps({'status':'refused','reason':str(e)if isinstance(e,Refused)else type(e).__name__,'credentials_or_plan_record_emitted':False}));raise SystemExit(1)

@@ -1,0 +1,2 @@
+source/* -text
+reference/* -text whitespace=-blank-at-eof

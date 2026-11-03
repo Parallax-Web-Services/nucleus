@@ -1,0 +1,154 @@
+{
+  "common_sha256": "cd5fc702868af2e74965aa13677c691bd3eb872cdb20d5db45e0f0efe6855322",
+  "files": {
+    "alpha-managed-foundation-readonly.py": {
+      "before_sha256": "2c2cafb50457b58bfaecca9efb2e87d36b88fe8dd87f72115937462d5d73e435",
+      "bytes": 8279,
+      "literal_changes": {
+        "/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py": "/usr/local/lib/parallax-nebula-managed-v3/alpha-managed-health-bridge.py",
+        "dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab": "b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095"
+      },
+      "path": "source/alpha-managed-foundation-readonly.py",
+      "reference_path": "reference/alpha-managed-foundation-readonly.py.reference",
+      "sha256": "be39063281364f97ea72d19df3c57f97df7da0dd1e06e617d34a188c5d0f070b"
+    },
+    "alpha-managed-health-bridge.py": {
+      "before_sha256": "dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab",
+      "bytes": 10888,
+      "literal_changes": {
+        "922e9f5d3648ca1d6cb8f26b441abb454f62f05bd7ee8e66834ec82a002a5977": "e519baaf5daf066ab1ff603e953800c6bda8b77df8f7af47071a282e66ed402d"
+      },
+      "path": "source/alpha-managed-health-bridge.py",
+      "reference_path": "reference/alpha-managed-health-bridge.py.reference",
+      "sha256": "b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095"
+    },
+    "alpha-managed-health-refresher.py": {
+      "before_sha256": "93dced743853c85eb3a9f37413f84d3f2fb5f225665903ee48b3df4e996c716d",
+      "bytes": 8670,
+      "literal_changes": {
+        "/usr/local/lib/parallax-nebula/alpha-managed-health-bridge.py": "/usr/local/lib/parallax-nebula-managed-v3/alpha-managed-health-bridge.py",
+        "/usr/local/lib/parallax-nebula/managed-alpha-health.py": "/usr/local/lib/parallax-nebula-managed-v3/managed-alpha-health.py",
+        "/usr/local/lib/parallax-nebula/managed-health-overlay.py": "/usr/local/lib/parallax-nebula-managed-v3/managed-health-overlay.py",
+        "922e9f5d3648ca1d6cb8f26b441abb454f62f05bd7ee8e66834ec82a002a5977": "e519baaf5daf066ab1ff603e953800c6bda8b77df8f7af47071a282e66ed402d",
+        "dc5327c3fca761a5875619706ea1e9017243828f840fab5645e250f65fab47ab": "b8e05a5557ded628307f387879b2ef63297f8162790a54177ce7d8edd628b095"
+      },
+      "path": "source/alpha-managed-health-refresher.py",
+      "reference_path": "reference/alpha-managed-health-refresher.py.reference",
+      "sha256": "59a6dd7ad8829e1756a2b47afd3855c5a7d2fe093e16b3f906cb4cccccb8f10c"
+    },
+    "controller-retirement.py": {
+      "before_sha256": "97b8c880dc62c79ab3b293261a8fd7045410c4a7cc9025df6eddba04d32fbbaf",
+      "bytes": 14428,
+      "literal_changes": {
+        "/usr/local/lib/parallax-nebula/managed-health-overlay.py": "/usr/local/lib/parallax-nebula-managed-v3/managed-health-overlay.py",
+        "cbd11366ee7bf33354a0aa17b5a7360f40076db9e8d042f97251fcbbc1797948": "487a8c4af222935ec819e37d35f10fa34873b02949e3a45639f66d5d8582d497"
+      },
+      "path": "source/controller-retirement.py",
+      "reference_path": "reference/controller-retirement.py.reference",
+      "sha256": "809e75e795e0904d4b37433107c1b2a9f092ee8fc3a8ef9a43d731dbffc04570"
+    },
+    "managed-alpha-health.py": {
+      "before_sha256": "922e9f5d3648ca1d6cb8f26b441abb454f62f05bd7ee8e66834ec82a002a5977",
+      "bytes": 6261,
+      "literal_changes": {
+        "cbd11366ee7bf33354a0aa17b5a7360f40076db9e8d042f97251fcbbc1797948": "487a8c4af222935ec819e37d35f10fa34873b02949e3a45639f66d5d8582d497"
+      },
+      "path": "source/managed-alpha-health.py",
+      "reference_path": "reference/managed-alpha-health.py.reference",
+      "sha256": "e519baaf5daf066ab1ff603e953800c6bda8b77df8f7af47071a282e66ed402d"
+    },
+    "managed-health-overlay.py": {
+      "before_sha256": "cbd11366ee7bf33354a0aa17b5a7360f40076db9e8d042f97251fcbbc1797948",
+      "bytes": 9303,
+      "literal_changes": {
+        "00b100dc9e2d75b2cd3ded5afe15b5c91ea255b24317b98378276b37c55e89e3": "910defc107310d48cd1f4d8679a38a0c60f8df411680faadaa7fbd1eb8dd92a7"
+      },
+      "path": "source/managed-health-overlay.py",
+      "reference_path": "reference/managed-health-overlay.py.reference",
+      "sha256": "487a8c4af222935ec819e37d35f10fa34873b02949e3a45639f66d5d8582d497"
+    },
+    "prepare_config.py": {
+      "before_sha256": "8366821a5633371ed776517948dce2ef61c797a4ad67b0c929d3b1eaec25b6c7",
+      "bytes": 4236,
+      "literal_changes": {
+        "00b100dc9e2d75b2cd3ded5afe15b5c91ea255b24317b98378276b37c55e89e3": "910defc107310d48cd1f4d8679a38a0c60f8df411680faadaa7fbd1eb8dd92a7"
+      },
+      "path": "source/prepare_config.py",
+      "reference_path": "reference/prepare_config.py.reference",
+      "sha256": "4ca26d28d6b8231c8036556dd286560e74eee62cb415174056b0809366a901b4"
+    },
+    "producer.py": {
+      "before_sha256": "00b100dc9e2d75b2cd3ded5afe15b5c91ea255b24317b98378276b37c55e89e3",
+      "bytes": 30080,
+      "literal_changes": {},
+      "path": "source/producer.py",
+      "reference_path": "reference/producer.py.reference",
+      "sha256": "910defc107310d48cd1f4d8679a38a0c60f8df411680faadaa7fbd1eb8dd92a7"
+    }
+  },
+  "fixture_reference_pins": {
+    "legacy-durability.py": "0883835c069808543115f102ffa42fffca7e6a716bef1badb532f1a6b1f5e926",
+    "legacy-lifecycle.py": "6b4ae6d7be5ed6a21db251c8da6e103c251da803819fa820e788cdb7abfcad90"
+  },
+  "future_source_directory": "/usr/local/lib/parallax-nebula-managed-v3",
+  "no_private_installation_data_or_receipts": true,
+  "schema_version": 1,
+  "status": "reviewed_source_checkpoint_not_installed",
+  "tests": {
+    "test_alpha_bridge.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "3a924f4cf5e975ae66f48b2825d9f9a437932f6ecbe9311706a9d9fc8ffea482",
+      "source_test_sha256": "a062473c37a237aa35536cbaa2998f4d78d508a18b0e25dbdbcc7eaf102bc8b0"
+    },
+    "test_alpha_refresher.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "0b408e233e96bbe93508648837bfac02d79f7315426c903e39909943a7061bc7",
+      "source_test_sha256": "6fc86d248774e714f57b25d9d5144862256bd1225682eb557a1979e5d347b3ef"
+    },
+    "test_dependency_graph.py": {
+      "adaptation": "public reference integrity instead of developer temporary-path/live preservation checks; same graph/AST logic",
+      "portable_test_sha256": "7ae0a0d241f80e0cdd5dae4565fbebc6bf31fd12ef29c1a9138ca649fbd8747d",
+      "source_test_sha256": "ce4c0e9365cd21148dd00805ca162cb9619adf5efab2868f81efce67fa01acbb"
+    },
+    "test_empty_exec_compat.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "3397c96aa5d9d874ee39fd0126963fd7de37a05b58f0fdc355fe7cf7659b61ea",
+      "source_test_sha256": "44e20e8c3f0afacee47ffcb1e6f7a86e27197d510253660e1d05848a6f7dd6c6"
+    },
+    "test_foundation.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "dcdc1de9c8b9de4772119c531e21472e5245bfda48335d057229c72f93bead04",
+      "source_test_sha256": "b3354614e25cef9553065630a0ea81ea6b1b20b5afd0e2d68193847273f39cb2"
+    },
+    "test_managed_alpha.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "0aff6e878dd0e62f018b6c2993c9ca0680ef5dd52d0f5a2a7f3eaad6ad86aef0",
+      "source_test_sha256": "1d11cc62f254547c4a545767b4fc7791c750aa2bbfbfd10ff71ff5d7d10b6a5d"
+    },
+    "test_managed_overlay.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "095bc090722f0f804cefb851fb7bc21c1fd0eb5cd756df9b43bb0e7d70555560",
+      "source_test_sha256": "4d9b7cdd9e6a8b33845bcfdd1aaa3fabd133aa07c8a264fde71a1fc19c346a8a"
+    },
+    "test_managed_source.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "2bed7ab29df99f341395598f36164cbeb474dcbdd215825c7b5dc46db98cbea1",
+      "source_test_sha256": "0d95dd8cb6c5ca8515891ff08e50d4777f8e4765b3586141dacc08ce52ef6b4d"
+    },
+    "test_prepare_config.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "c934f63098afa744509deeee954e4f2f931ab6c3c7380a6d6d9999a242a02be9",
+      "source_test_sha256": "c44e747fc2e688ca9f9639a82762a11eaa402b1e720186672bfb6d609c1a459a"
+    },
+    "test_producer.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "c884bd406d83a65ffeca30bb0eb8e7e989a1f7e0e06ad524ccaf50647c0a7d4d",
+      "source_test_sha256": "c9c186e4c25db5a4e07f446a83502ffaad3412dedb0a2602aae48d4c9967b6f6"
+    },
+    "test_retirement.py": {
+      "adaptation": "explicit package-relative source/reference imports only",
+      "portable_test_sha256": "1b8224ed0da87e1b47f4c0d02c4c09137fb75647b3cd486c4fbaf75971f47eb9",
+      "source_test_sha256": "22ce0290312725622c75dedb46b7917e2f9b6df6be3399969cfe5a965121382b"
+    }
+  }
+}

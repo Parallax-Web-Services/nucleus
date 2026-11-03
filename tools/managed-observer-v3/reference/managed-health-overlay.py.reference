@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""SOURCE ONLY: private managed-owner health overlay, never a token exporter.
+Admission is an explicit reviewed action. Checks use ManagedSource afresh and
+never read owner state/CA, the old session or a saved bearer. No activation.
+"""
+import argparse,base64,hashlib,json,os,re,stat,tempfile,time,types
+from pathlib import Path
+PRODUCER_SHA='00b100dc9e2d75b2cd3ded5afe15b5c91ea255b24317b98378276b37c55e89e3'
+FIELDS=('st_dev','st_ino','st_mode','st_uid','st_gid','st_nlink','st_size','st_mtime_ns','st_ctime_ns')
+class Refused(Exception):pass
+def need(ok,label):
+ if not ok:raise Refused(label)
+def identity(s):return {k:getattr(s,k)for k in FIELDS}
+def read(path,limit=8*1024*1024):
+ need(path.is_absolute()and path.resolve()==path,'private_canonical_path_required');fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+ try:
+  s=os.fstat(fd);need(stat.S_ISREG(s.st_mode)and s.st_uid==s.st_gid==0 and stat.S_IMODE(s.st_mode)==0o600 and s.st_nlink==1 and s.st_size<=limit,'private_metadata_differs');data=bytearray()
+  while True:
+   chunk=os.read(fd,min(65536,limit+1-len(data)))
+   if not chunk:break
+   data.extend(chunk);need(len(data)<=limit,'private_file_too_large')
+  need(identity(s)==identity(os.fstat(fd))==identity(path.lstat()),'private_file_changed');return bytes(data),{'identity':identity(s),'sha256':hashlib.sha256(data).hexdigest()}
+ finally:os.close(fd)
+def unique(pairs):
+ out={}
+ for k,v in pairs:need(k not in out,'duplicate_json_key');out[k]=v
+ return out
+def decode(data):return json.loads(data,object_pairs_hook=unique,parse_constant=lambda _:(_ for _ in()).throw(Refused('nonfinite_json')))
+def load_producer(path):
+ data,r=read(path,1024*1024);need(r['sha256']==PRODUCER_SHA,'producer_source_differs');m=types.ModuleType('reviewed_managed_source');m.__file__=str(path);exec(compile(data,str(path),'exec'),m.__dict__);return m,r
+def metadata_unchanged(path,record):
+ s=path.lstat();need(path.resolve()==path and identity(s)==record['identity'],'accepted_cutover_metadata_changed')
+def new_private(path,data):
+ need(path.parent.resolve()==path.parent,'overlay_parent_not_canonical');s=path.parent.lstat();need(stat.S_ISDIR(s.st_mode)and s.st_uid==s.st_gid==0 and stat.S_IMODE(s.st_mode)==0o700 and not os.path.lexists(path),'new_private_overlay_required');fd,name=tempfile.mkstemp(prefix='.overlay-',dir=path.parent);temp=Path(name);held=os.fstat(fd)
+ try:
+  with os.fdopen(fd,'wb')as f:f.write(data);f.flush();os.fchmod(f.fileno(),0o600);os.fsync(f.fileno());staged=identity(os.fstat(f.fileno()))
+  need(identity(temp.lstat())==staged and read(temp)[0]==data,'overlay_temp_changed');need(not os.path.lexists(path),'overlay_target_exists');os.link(temp,path,follow_symlinks=False);need((temp.lstat().st_dev,temp.lstat().st_ino)==(held.st_dev,held.st_ino),'overlay_temp_replaced');temp.unlink();after,record=read(path);need((record['identity']['st_dev'],record['identity']['st_ino'])==(held.st_dev,held.st_ino)and after==data,'overlay_postimage_unknown');return record
+ finally:
+  try:
+   s=temp.lstat()
+   if(s.st_dev,s.st_ino)==(held.st_dev,held.st_ino):temp.unlink()
+  except FileNotFoundError:pass
+def reduce_health(view,c,expected,required,now,m):
+ result=m.normalize(view,c,now);hosts={n['node_id']:n for n in result['hosts']};need(set(hosts)==set(expected),'managed_membership_set_differs');need(len(expected)==5 and len(set(expected))==5 and len(required)==4 and len(set(required))==4 and set(required)<=set(expected)and c['local_node_id']in required,'approved_server_scope_differs');need(-5000<=now-result['view_collected_at_ms']<=10000,'managed_view_not_fresh')
+ for node_id in required:
+  n=hosts[node_id];need(n['status']=='online','required_server_not_online')
+  for k in['last_seen_at_ms','resource_collected_at_ms']:need(type(n[k])is int and -5000<=now-n[k]<=10000,'required_server_sample_not_fresh')
+ return {'registered_node_count':len(hosts),'required_server_count':len(required),'required_server_online_count':4,'same_fabric':True,'required_server_resources_fresh':True}
+def admit(origin_path,cutover_path,config_path,output,producer_path):
+ m,producer_record=load_producer(producer_path);origin_bytes,origin_record=read(origin_path,16384);origin=decode(origin_bytes);need(set(origin)=={'schema_version','original_plan_record','old_owner','expected_members','required_server_ids','quiescence_id'}and origin['schema_version']==1,'origin_binding_shape_differs');need(set(origin['old_owner'])=={'pid','start','exe_metadata'},'original_owner_binding_differs');need(isinstance(origin['original_plan_record'],dict)and set(origin['original_plan_record'])=={'identity','sha256'},'original_plan_record_missing');cutover_bytes,cutover_record=read(cutover_path,16*1024*1024);a=decode(cutover_bytes);need(a.get('schema_version')==1 and a.get('phase')=='managed-ready'and a.get('native_identity_load_validated')is True,'managed_cutover_not_accepted');need(all(a['owner'][k]==v for k,v in origin['old_owner'].items()),'original_owner_not_bound_to_cutover');gate=decode(base64.b64decode(a['legacy_quiescence']['record']['bytes'],validate=True));need(gate['quiescence_id']==origin['quiescence_id'],'quiescence_binding_differs');c,config_record=m.load_config(config_path);public=decode(base64.b64decode(a['state']['state']['bytes'],validate=True))['public'];need(c['fabric_id']==public['fabric_id']and c['local_node_id']==public['owner_id']==public['node_id']and sorted(public['members'])==sorted(origin['expected_members']),'managed_identity_or_membership_differs');source=m.ManagedSource(c)
+ try:
+  source.resolve();binding=source.binding;need(int(binding['unit']['loaded']['MainPID'])==a['managed_process']['pid']and int(binding['start'])==a['managed_process']['start'],'initial_managed_invocation_differs');need(c['coordinator']['uid']==int(a['managed_process']['uids'][0])and c['coordinator']['gid']==int(a['managed_process']['gids'][0]),'managed_account_differs');source.guard()
+ finally:source.close()
+ # The explicit admission is the only phase that reads the private cutover
+ # state. Collections below compare just its metadata and use ManagedSource.
+ value={'schema_version':2,'overlay_id':os.urandom(16).hex(),'created_at_unix':int(time.time()),'origin_binding_path':str(origin_path),'origin_binding_record':origin_record,'original_plan_record':origin['original_plan_record'],'old_owner':origin['old_owner'],'cutover_path':str(cutover_path),'cutover_record':cutover_record,'initial_managed_process':a['managed_process'],'producer_path':str(producer_path),'producer_record':producer_record,'config_path':str(config_path),'config_record':config_record,'expected_members':origin['expected_members'],'required_server_ids':origin['required_server_ids'],'quiescence_id':decode(base64.b64decode(a['legacy_quiescence']['record']['bytes'],validate=True))['quiescence_id']};need(read(origin_path,16384)[1]==origin_record and read(cutover_path,16*1024*1024)[1]==cutover_record and m.record(config_path,8192)==config_record,'admission_inputs_changed');new_private(output,(json.dumps(value,sort_keys=True,indent=2)+'\n').encode());return {'status':'admitted','schema_version':2,'overlay_id':value['overlay_id'],'credential_bytes_emitted':False,'original_plan_modified':False}
+def check(overlay_path):
+ overlay_bytes,overlay_record=read(overlay_path,65536);o=decode(overlay_bytes);need(o.get('schema_version')==2 and re.fullmatch('[a-f0-9]{32}',o.get('overlay_id','')),'overlay_shape_differs');m,source_record=load_producer(Path(o['producer_path']));need(source_record==o['producer_record'],'admitted_producer_changed');need(read(Path(o['origin_binding_path']),16384)[1]==o['origin_binding_record'],'original_binding_changed');metadata_unchanged(Path(o['cutover_path']),o['cutover_record']);c,config_record=m.load_config(Path(o['config_path']));need(config_record==o['config_record'],'managed_config_changed');view=m.fetch(c);summary=reduce_health(view,c,o['expected_members'],o['required_server_ids'],int(time.time()*1000),m);need(read(overlay_path,65536)[1]==overlay_record and m.record(Path(o['config_path']),8192)==config_record,'health_inputs_changed');metadata_unchanged(Path(o['cutover_path']),o['cutover_record']);return {'schema_version':2,'overlay_id':o['overlay_id'],'checked_at_unix':int(time.time()),'managed_owner_matches':True,'cutover_receipt_unchanged':True,**summary}
+def main():
+ os.umask(0o077);need(os.geteuid()==0,'root_only');p=argparse.ArgumentParser(description=__doc__);p.add_argument('mode',choices=['admit','check']);p.add_argument('--overlay',type=Path,required=True);p.add_argument('--origin-binding',type=Path);p.add_argument('--cutover',type=Path);p.add_argument('--config',type=Path);p.add_argument('--producer-source',type=Path);a=p.parse_args()
+ if a.mode=='admit':need(all([a.origin_binding,a.cutover,a.config,a.producer_source]),'admission_arguments_required');result=admit(a.origin_binding,a.cutover,a.config,a.overlay,a.producer_source)
+ else:need(not any([a.origin_binding,a.cutover,a.config,a.producer_source]),'check_has_no_admission_arguments');result=check(a.overlay)
+ print(json.dumps(result))
+if __name__=='__main__':
+ try:main()
+ except Exception as e:print(json.dumps({'status':'refused','reason':str(e)if isinstance(e,Refused)else type(e).__name__,'credential_bytes_emitted':False}));raise SystemExit(1)

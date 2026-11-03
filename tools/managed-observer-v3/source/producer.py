@@ -1,0 +1,623 @@
+#!/usr/bin/env python3
+"""Read-only authenticated observations; never scheduler reservations."""
+import fcntl
+import hashlib
+import http.client
+import json
+import math
+import os
+import pwd
+import re
+import socket
+import subprocess
+import shlex
+import stat
+import sys
+import tempfile
+import threading
+import time
+from pathlib import Path
+from urllib.parse import urlsplit
+
+CONFIG = Path('/etc/parallax/nebula-capacity/producer.json')
+OUTPUT = Path('/var/lib/parallax-nebula-capacity/fleet.json')
+MAX_BODY = 4 * 1024 * 1024
+MAX_OUTPUT = 262144
+MAX_AGE_MS = 30_000
+FUTURE_MS = 5_000
+ID = re.compile(r'[a-f0-9]{64}\Z')
+META = ('st_dev','st_ino','st_mode','st_uid','st_gid','st_nlink','st_size','st_mtime_ns','st_ctime_ns')
+
+class Refused(Exception):
+    pass
+
+def require(ok):
+    if not ok:
+        raise Refused()
+
+def duplicate_free(pairs):
+    out = {}
+    for key, value in pairs:
+        require(key not in out)
+        out[key] = value
+    return out
+
+def decode(raw):
+    return json.loads(raw, object_pairs_hook=duplicate_free,
+                      parse_constant=lambda _: (_ for _ in ()).throw(Refused()))
+
+def identity(s):
+    return {key:getattr(s,key) for key in META}
+
+def record(path, limit=MAX_BODY):
+    if not os.path.lexists(path):
+        return None
+    require(path.is_absolute() and path.resolve() == path)
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    try:
+        before = os.fstat(fd)
+        require(stat.S_ISREG(before.st_mode) and before.st_nlink == 1 and before.st_size <= limit)
+        raw = bytearray()
+        while True:
+            part = os.read(fd, min(65536, limit + 1 - len(raw)))
+            if not part:
+                break
+            raw.extend(part)
+            require(len(raw) <= limit)
+        require(identity(before) == identity(os.fstat(fd)) == identity(path.lstat()))
+        return {'identity':identity(before),'sha256':hashlib.sha256(raw).hexdigest()}
+    finally:
+        os.close(fd)
+
+def read_recorded(path, expected, limit=MAX_BODY):
+    require(record(path,limit) == expected and expected is not None)
+    fd = os.open(path,os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    try:
+        require(identity(os.fstat(fd)) == expected['identity'])
+        raw = bytearray()
+        while True:
+            part = os.read(fd,min(65536,limit + 1 - len(raw)))
+            if not part:
+                break
+            raw.extend(part)
+            require(len(raw) <= limit)
+        require(identity(os.fstat(fd)) == expected['identity'])
+    finally:
+        os.close(fd)
+    require(record(path,limit) == expected and hashlib.sha256(raw).hexdigest() == expected['sha256'])
+    return bytes(raw)
+
+def safe_parents(path):
+    parent = path.parent
+    while True:
+        require(parent.resolve() == parent)
+        s = parent.lstat()
+        require(stat.S_ISDIR(s.st_mode) and s.st_uid == 0 and not stat.S_IMODE(s.st_mode) & 0o022)
+        if parent == Path('/'):
+            return
+        parent = parent.parent
+
+def exact_file(r,uid,gid,mode):
+    require(r is not None)
+    s = r['identity']
+    require(s['st_uid'] == uid and s['st_gid'] == gid and stat.S_IMODE(s['st_mode']) == mode)
+
+COORDINATOR_UNIT = 'nucleus-coordinator.service'
+COORDINATOR_ACCOUNT = 'nucleus-coordinator'
+UNIT_PATH = Path('/etc/systemd/system') / COORDINATOR_UNIT
+ENABLE_PATH = UNIT_PATH.parent/'multi-user.target.wants'/COORDINATOR_UNIT
+BINARY = Path('/opt/parallax/nucleus-coordinator/nucleus')
+STATE_HOME = Path('/var/lib/parallax-nucleus-coordinator')
+STARTUP_LOG = Path('/var/log/parallax-nucleus-coordinator/startup.log')
+PROC = Path('/proc')
+MAX_LOG = 65536
+MAX_BINARY = 64 * 1024 * 1024
+SYSTEMD_FIELDS = ('Id','LoadState','ActiveState','SubState','UnitFileState','FragmentPath',
+    'DropInPaths','NeedDaemonReload','Transient','MainPID','InvocationID','ControlGroup',
+    'User','Group','Type','WorkingDirectory','Environment','StandardOutput','StandardError',
+    'ExecStartPre','ExecStartPost','ExecReload','ExecStop','ExecStopPost',
+    'ExecMainStartTimestampMonotonic')
+
+def validate_config(c):
+    require(isinstance(c,dict) and set(c) == {'schema_version','api_origin','fabric_id','local_node_id','coordinator'})
+    require(type(c['schema_version']) is int and c['schema_version'] == 2)
+    u = urlsplit(c['api_origin'])
+    require(u.scheme == 'http' and u.hostname == '127.0.0.1' and u.port is not None
+            and 0 < u.port < 65536 and c['api_origin'] == 'http://127.0.0.1:' + str(u.port))
+    require(all(isinstance(c[k],str) and ID.fullmatch(c[k]) for k in ['fabric_id','local_node_id']))
+    v = c['coordinator']
+    require(isinstance(v,dict) and set(v) == {'unit','unit_sha256','binary_sha256','argv_sha256','uid','gid','state_device','state_inode','loopback_ports'})
+    require(v['unit'] == COORDINATOR_UNIT)
+    require(all(isinstance(v[k],str) and ID.fullmatch(v[k]) for k in ['unit_sha256','binary_sha256','argv_sha256']))
+    require(type(v['uid']) is int and v['uid'] > 0 and type(v['gid']) is int and v['gid'] > 0)
+    require(type(v['state_device']) is int and v['state_device'] >= 0 and type(v['state_inode']) is int and v['state_inode'] > 0)
+    ports = v['loopback_ports']
+    require(isinstance(ports,list) and len(ports) == 2 and all(type(p) is int and 0 < p < 65536 for p in ports)
+            and ports == sorted(set(ports)) and u.port in ports)
+    return c
+
+def load_config(path=CONFIG):
+    safe_parents(path)
+    before = record(path,8192)
+    exact_file(before,0,0,0o600)
+    return validate_config(decode(read_recorded(path,before,8192))),before
+
+def proc_start(path):
+    return path.read_text().rsplit(') ',1)[1].split()[19]
+
+def directory_identity(path,uid,gid,mode):
+    require(path.is_absolute() and path.resolve() == path)
+    s = path.lstat()
+    require(stat.S_ISDIR(s.st_mode) and s.st_uid == uid and s.st_gid == gid and stat.S_IMODE(s.st_mode) == mode)
+    return {k:getattr(s,k) for k in ('st_dev','st_ino','st_mode','st_uid','st_gid')}
+
+def enabled_link():
+    safe_parents(ENABLE_PATH)
+    before = ENABLE_PATH.lstat()
+    require(stat.S_ISLNK(before.st_mode) and before.st_uid == before.st_gid == 0)
+    target = os.readlink(ENABLE_PATH)
+    require(target == str(UNIT_PATH) and identity(ENABLE_PATH.lstat()) == identity(before))
+    return {'identity':identity(before),'target':target}
+
+# systemctl's Exec* formatter can omit empty arrays. Only these five may be
+# completed, and only after the exact fixed D-Bus property proves a typed zero.
+EMPTY_EXEC_FIELDS = ('ExecStartPre','ExecStartPost','ExecReload','ExecStop','ExecStopPost')
+SYSTEMD_BUS_OBJECT = '/org/freedesktop/systemd1/unit/nucleus_2dcoordinator_2eservice'
+
+def _read_systemd_output(args, capacity, deadline):
+    # Fixed anonymous capacity: neither stdout PIPE buffering nor a disk file.
+    # The child's duplicated stdout shares this offset; no preexec/global rlimit.
+    remaining = deadline-time.monotonic()
+    require(remaining > 0 and capacity in (128,32768))
+    fd = os.memfd_create('nebula-systemd-read',os.MFD_CLOEXEC|os.MFD_ALLOW_SEALING)
+    try:
+        os.ftruncate(fd,capacity)
+        seals = fcntl.F_SEAL_GROW|fcntl.F_SEAL_SHRINK|fcntl.F_SEAL_SEAL
+        fcntl.fcntl(fd,fcntl.F_ADD_SEALS,seals)
+        remaining = deadline-time.monotonic()
+        require(remaining > 0)
+        r = subprocess.run(args,stdin=subprocess.DEVNULL,stdout=fd,stderr=subprocess.DEVNULL,
+                           env={'PATH':'/usr/bin:/bin','LC_ALL':'C'},timeout=remaining)
+        size = os.lseek(fd,0,os.SEEK_CUR)
+        require(r.returncode == 0 and 0 < size <= capacity and os.fstat(fd).st_size == capacity
+                and fcntl.fcntl(fd,fcntl.F_GET_SEALS) == seals)
+        raw = os.pread(fd,size,0)
+        require(len(raw) == size and time.monotonic() <= deadline)
+        return raw
+    finally:
+        os.close(fd)
+
+def _show_systemd_properties(deadline):
+    raw = _read_systemd_output(['/usr/bin/systemctl','show',COORDINATOR_UNIT,'--no-pager',
+                               *['--property='+k for k in SYSTEMD_FIELDS]],32768,deadline)
+    values = {}
+    for line in raw.decode('utf-8').splitlines():
+        key,separator,value = line.partition('=')
+        require(separator and key in SYSTEMD_FIELDS and key not in values)
+        values[key] = value
+    return values
+
+def systemd_state():
+    # One aggregate budget, not two seconds multiplied by seven subprocesses.
+    deadline = time.monotonic()+2
+    values = _show_systemd_properties(deadline)
+    missing = set(SYSTEMD_FIELDS)-set(values)
+    require(missing <= set(EMPTY_EXEC_FIELDS))
+    if missing:
+        require(values.get('Id') == COORDINATOR_UNIT)
+        for key in EMPTY_EXEC_FIELDS:
+            if key in missing:
+                answer = _read_systemd_output(['/usr/bin/busctl','--system','get-property',
+                    'org.freedesktop.systemd1',SYSTEMD_BUS_OBJECT,
+                    'org.freedesktop.systemd1.Service',key],128,deadline)
+                require(answer.strip() == b'a(sasbttttuii) 0')
+        # Compare presence as well as values. Never merge a new invocation,
+        # changing serialization or changed overlapping property into this view.
+        require(_show_systemd_properties(deadline) == values)
+        values = dict(values)
+        values.update({key:'' for key in missing})
+    require(set(values) == set(SYSTEMD_FIELDS) and time.monotonic() <= deadline)
+    return values
+
+def checked_unit(c):
+    safe_parents(UNIT_PATH)
+    unit = record(UNIT_PATH,32768)
+    exact_file(unit,0,0,0o644)
+    require(unit['sha256'] == c['coordinator']['unit_sha256'])
+    # The exact admitted file and an unmodified loaded unit must agree. No helpers
+    # or drop-ins may change custody of its process or private startup output.
+    directives = {}
+    section = None
+    for raw in read_recorded(UNIT_PATH,unit,32768).decode('utf-8').splitlines():
+        line = raw.strip()
+        if not line or line.startswith(('#',';')):
+            continue
+        require(not line.endswith('\\'))
+        if line.startswith('[') and line.endswith(']'):
+            section = line[1:-1]
+            continue
+        require('=' in line)
+        key,value = line.split('=',1)
+        directives.setdefault((section,key),[]).append(value)
+    expected = {'User':COORDINATOR_ACCOUNT,'Group':COORDINATOR_ACCOUNT,'Type':'simple',
+                'WorkingDirectory':str(STATE_HOME),'StandardOutput':'truncate:'+str(STARTUP_LOG),
+                'StandardError':'inherit','Restart':'on-failure','KillMode':'control-group'}
+    require(all(directives.get(('Service',k)) == [v] for k,v in expected.items()))
+    require(directives.get(('Install','WantedBy')) == ['multi-user.target'])
+    require(directives.get(('Service','Environment')) is not None)
+    env = [item for line in directives[('Service','Environment')] for item in shlex.split(line)]
+    require(sorted(env) == sorted(['NUCLEUS_HOME='+str(STATE_HOME),'HOME='+str(STATE_HOME)]))
+    require(not any(section == 'Service' and key.startswith('Exec') and key != 'ExecStart'
+                    for section,key in directives))
+    require(len(directives.get(('Service','ExecStart'),[])) == 1)
+    command = shlex.split(directives[('Service','ExecStart')][0])
+    require(command and command[0] == str(BINARY) and command[1:2] == ['run'])
+    for key in ['ExecStartPre','ExecStartPost','ExecReload','ExecStop','ExecStopPost','EnvironmentFile','RootDirectory','RootImage']:
+        require(('Service',key) not in directives)
+    loaded = systemd_state()
+    require(all(loaded[k] == v for k,v in {'Id':COORDINATOR_UNIT,'LoadState':'loaded',
+        'ActiveState':'active','SubState':'running','UnitFileState':'enabled','FragmentPath':str(UNIT_PATH),
+        'DropInPaths':'','NeedDaemonReload':'no','Transient':'no','User':COORDINATOR_ACCOUNT,
+        'Group':COORDINATOR_ACCOUNT,'Type':'simple','WorkingDirectory':str(STATE_HOME),
+        'StandardOutput':'truncate','StandardError':'inherit','ControlGroup':'/system.slice/'+COORDINATOR_UNIT}.items()))
+    require(all(loaded[k] == '' for k in ['ExecStartPre','ExecStartPost','ExecReload','ExecStop','ExecStopPost']))
+    require(sorted(shlex.split(loaded['Environment'])) == sorted(env))
+    require(re.fullmatch(r'[1-9][0-9]{0,9}',loaded['MainPID']) and re.fullmatch(r'[a-f0-9]{32}',loaded['InvocationID'])
+            and re.fullmatch(r'[1-9][0-9]{0,19}',loaded['ExecMainStartTimestampMonotonic']))
+    require(record(UNIT_PATH,32768) == unit)
+    return {'unit':unit,'enable':enabled_link(),'loaded':loaded,'command':command}
+
+def owned_listeners(proc,ports):
+    held = set()
+    for fd in (proc/'fd').iterdir():
+        try:
+            value = os.readlink(fd)
+        except FileNotFoundError:
+            continue
+        if re.fullmatch(r'socket:\[[0-9]+\]',value):
+            held.add(value[8:-1])
+    expected = {'0100007F:'+format(port,'04X') for port in ports}
+    seen,owned = {},[]
+    for family in ['tcp','tcp6']:
+        for line in (PROC/'net'/family).read_text().splitlines()[1:]:
+            parts = line.split()
+            if len(parts) < 10 or parts[3] != '0A':
+                continue
+            address,inode = parts[1],parts[9]
+            if family == 'tcp' and address in expected:
+                seen.setdefault(address,[]).append(inode)
+            if inode in held:
+                require(family == 'tcp' and address in expected)
+                owned.append((address,inode))
+    require(set(seen) == expected and all(len(v) == 1 for v in seen.values())
+            and len(owned) == 2 and set(owned) == {(a,v[0]) for a,v in seen.items()})
+    return sorted(owned)
+
+class ManagedSource:
+    """One collection's private cohort. Never persist its PID, token or log bytes."""
+    def __init__(self,c):
+        self.c = validate_config(c)
+        self.fd = None
+        self.log_fd = None
+        self.binding = None
+        self.token = None
+    def close(self):
+        if self.fd is not None:
+            os.close(self.fd)
+            self.fd = None
+        if self.log_fd is not None:
+            os.close(self.log_fd)
+            self.log_fd = None
+        self.token = None
+        self.binding = None
+    def snapshot(self):
+        c,v = self.c,self.c['coordinator']
+        account = pwd.getpwnam(COORDINATOR_ACCOUNT)
+        require(account.pw_uid == v['uid'] and account.pw_gid == v['gid'])
+        safe_parents(BINARY)
+        directory_identity(BINARY.parent,0,0,0o555)
+        binary = record(BINARY,MAX_BINARY)
+        exact_file(binary,0,0,0o555)
+        require(binary['sha256'] == v['binary_sha256'])
+        if self.fd is not None:
+            require(identity(os.fstat(self.fd)) == binary['identity'])
+        safe_parents(STATE_HOME)
+        home = directory_identity(STATE_HOME,v['uid'],v['gid'],0o700)
+        require((home['st_dev'],home['st_ino']) == (v['state_device'],v['state_inode']))
+        safe_parents(STARTUP_LOG)
+        directory_identity(STARTUP_LOG.parent,0,0,0o700)
+        log = record(STARTUP_LOG,MAX_LOG)
+        exact_file(log,0,0,0o600)
+        if self.log_fd is not None:
+            require(identity(os.fstat(self.log_fd)) == log["identity"])
+        unit = checked_unit(c)
+        proc = PROC/unit['loaded']['MainPID']
+        start = proc_start(proc/'stat')
+        require(start.isdigit() and int(start) > 0)
+        start_us = int(start)*1000000//os.sysconf('SC_CLK_TCK')
+        require(abs(start_us-int(unit['loaded']['ExecMainStartTimestampMonotonic'])) <= 2000000)
+        # A previous invocation's log cannot supply the next invocation's bearer.
+        born_ns = time.time_ns()-time.monotonic_ns()+start_us*1000
+        require(log['identity']['st_mtime_ns'] >= born_ns-2000000000)
+        require(os.readlink(proc/'exe') == str(BINARY))
+        exe = (proc/'exe').stat()
+        require((exe.st_dev,exe.st_ino) == (binary['identity']['st_dev'],binary['identity']['st_ino']))
+        status = (proc/'status').read_text().splitlines()
+        for label,expected in [('Uid:',v['uid']),('Gid:',v['gid'])]:
+            fields = next(x for x in status if x.startswith(label)).split()[1:]
+            require(len(fields) == 4 and all(int(x) == expected for x in fields))
+        command = (proc/'cmdline').read_bytes()
+        require(len(command) <= 16384 and hashlib.sha256(command).hexdigest() == v['argv_sha256'])
+        require(command.endswith(b'\0') and command[:-1].split(b'\0') == [arg.encode() for arg in unit['command']])
+        cgroups = (proc/'cgroup').read_text().splitlines()
+        require(cgroups == ['0::'+unit['loaded']['ControlGroup']])
+        for number in ['1','2']:
+            f = proc/'fd'/number
+            require(os.readlink(f) == str(STARTUP_LOG))
+            s = f.stat()
+            require((s.st_dev,s.st_ino) == (log['identity']['st_dev'],log['identity']['st_ino']))
+        listeners = owned_listeners(proc,v['loopback_ports'])
+        require(proc_start(proc/'stat') == start and systemd_state() == unit['loaded'])
+        require(record(STARTUP_LOG,MAX_LOG) == log)
+        return {'unit':unit,'binary':binary,'home':home,'log':log,'start':start,'listeners':listeners}
+    def resolve(self):
+        try:
+            self.binding = self.snapshot()
+            self.fd = os.open(BINARY,os.O_RDONLY|os.O_NOFOLLOW)
+            require(identity(os.fstat(self.fd)) == self.binding['binary']['identity'])
+            self.log_fd = os.open(STARTUP_LOG,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
+            require(identity(os.fstat(self.log_fd)) == self.binding['log']['identity'])
+            raw = os.pread(self.log_fd,MAX_LOG+1,0)
+            require(len(raw) <= MAX_LOG and hashlib.sha256(raw).hexdigest() == self.binding['log']['sha256'])
+            matches = re.findall(rb'^Resource map: http://127\.0\.0\.1:([0-9]{1,5})/#token=([a-f0-9]{64})\r?$',raw,re.MULTILINE)
+            require(len(matches) == 1)
+            port,token = matches[0]
+            require(int(port) == urlsplit(self.c['api_origin']).port)
+            self.token = token.decode('ascii')
+            # Admission checked native public identity. Never execute the legacy
+            # identity command here: Load fchmods state.lock and is not read-only.
+            self.guard()
+            return self
+        except BaseException:
+            self.close()
+            raise
+    def guard(self):
+        require(self.binding is not None and self.fd is not None and self.snapshot() == self.binding)
+
+def fetch(c,source_guard=None,source_factory=None):
+    # Only tests may inject the source factory. Production resolves a fresh managed
+    # invocation/log/token here, never at Publisher construction or from config.
+    managed = (ManagedSource if source_factory is None else source_factory)(c)
+    sock = None
+    timer = None
+    connection = None
+    try:
+        managed.resolve()
+        guard = managed.guard if source_guard is None else source_guard
+        start = time.monotonic()
+        guard()
+        port = urlsplit(c['api_origin']).port
+        sock = socket.create_connection(('127.0.0.1',port),timeout=5)
+        remaining = 5 - (time.monotonic()-start)
+        require(remaining > 0)
+        def close_own_socket():
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+            sock.close()
+        timer = threading.Timer(remaining,close_own_socket)
+        timer.daemon = True
+        connection = http.client.HTTPConnection('127.0.0.1',port,timeout=remaining)
+        connection.sock = sock
+        timer.start()
+        guard()
+        connection.request('GET','/api/v1/fabric',headers={
+            'Host':'127.0.0.1:'+str(port),'Authorization':'Bearer '+managed.token,
+            'Accept':'application/json','Connection':'close'})
+        response = connection.getresponse()
+        require(response.status == 200 and response.getheader('Content-Type','').split(';',1)[0].strip().lower() == 'application/json')
+        length = response.getheader('Content-Length')
+        if length is not None:
+            require(length.isdigit() and int(length) <= MAX_BODY)
+        raw = bytearray()
+        while True:
+            part = response.read1(min(65536,MAX_BODY+1-len(raw)))
+            if not part:
+                break
+            raw.extend(part)
+            require(len(raw) <= MAX_BODY)
+        require(time.monotonic()-start <= 5)
+        guard()
+        return decode(raw)
+    finally:
+        if timer is not None:timer.cancel()
+        if connection is not None:connection.close()
+        if sock is not None:sock.close()
+        managed.close()
+
+def integer(value,low=0,high=1 << 60):
+    require(type(value) is int and low <= value <= high)
+    return value
+
+def timestamp(value,now,nullable=True):
+    if value is None and nullable:
+        return None
+    return integer(value,1,now + FUTURE_MS)
+
+def normalize(view,c,now):
+    require(isinstance(view,dict) and type(view.get('schema_version')) is int and view['schema_version'] == 1)
+    require(view.get('fabric_id') == c['fabric_id'] and view.get('local_node_id') == c['local_node_id'])
+    collected = timestamp(view.get('collected_at_ms'),now,False)
+    require(now-collected <= MAX_AGE_MS)
+    nodes = view.get('nodes')
+    require(isinstance(nodes,list) and 1 <= len(nodes) <= 128)
+    hosts,seen,local = [],set(),0
+    for node in nodes:
+        require(isinstance(node,dict))
+        node_id,name,status = node.get('node_id'),node.get('name'),node.get('status')
+        require(isinstance(node_id,str) and ID.fullmatch(node_id) and node_id not in seen)
+        require(isinstance(name,str) and 1 <= len(name) <= 80 and not any(ord(x)<32 or ord(x)==127 for x in name))
+        require(status in ['online','offline','awaiting'])
+        expected_kind = 'local' if node_id == c['local_node_id'] else 'peer'
+        require(node.get('kind') == expected_kind)
+        local += node_id == c['local_node_id']
+        seen.add(node_id)
+        last = timestamp(node.get('last_seen_ms'),now)
+        require(last is None or last <= collected + FUTURE_MS)
+        h = {'node_id':node_id,'name':name,'status':status,'last_seen_at_ms':last,
+             'resource_collected_at_ms':None,'logical_cpus':None,'effective_cpu_cores':None,
+             'memory_total_bytes':None,'memory_available_bytes':None,'memory_effective_limit_bytes':None,
+             'storage_total_bytes':None,'storage_available_bytes':None}
+        r = node.get('resources')
+        require(status != 'online' or (r is not None and last is not None))
+        if r is not None:
+            require(isinstance(r,dict) and type(r.get('schema_version')) is int and r['schema_version'] == 1)
+            h['resource_collected_at_ms'] = timestamp(r.get('collected_at_ms'),now,False)
+            require(h['resource_collected_at_ms'] <= collected + FUTURE_MS)
+            cpu,memory = r.get('cpu'),r.get('memory')
+            require(isinstance(cpu,dict) and isinstance(memory,dict))
+            h['logical_cpus'] = integer(cpu.get('logical_cores'),1,4096)
+            effective = cpu.get('effective_cores')
+            if effective is not None:
+                require(type(effective) in [int,float] and math.isfinite(effective) and 0 <= effective <= h['logical_cpus'])
+                h['effective_cpu_cores'] = effective
+            h['memory_total_bytes'] = integer(memory.get('total_bytes'),1)
+            h['memory_available_bytes'] = integer(memory.get('available_bytes'),0,h['memory_total_bytes'])
+            if memory.get('effective_total_bytes') is not None:
+                h['memory_effective_limit_bytes'] = integer(memory['effective_total_bytes'],0,h['memory_total_bytes'])
+            storage = r.get('storage')
+            if storage is not None:
+                require(isinstance(storage,dict))
+                h['storage_total_bytes'] = integer(storage.get('total_bytes'),1)
+                h['storage_available_bytes'] = integer(storage.get('available_bytes'),0,h['storage_total_bytes'])
+        hosts.append(h)
+    require(local == 1)
+    return {'schema_version':1,'source':'nucleus-observations','captured_at_ms':now,
+            'view_collected_at_ms':collected,'available':True,'hosts':hosts}
+
+def unavailable(now):
+    return {'schema_version':1,'source':'nucleus-observations','captured_at_ms':now,
+            'view_collected_at_ms':None,'available':False,'hosts':[]}
+
+def observe(c,fetcher=fetch,clock=lambda:int(time.time()*1000)):
+    try:
+        view = fetcher(c)
+        return normalize(view,c,clock())
+    except Exception:
+        return unavailable(clock())
+
+class Publisher:
+    def __init__(self,output=OUTPUT,config_path=CONFIG,forge_gid=None):
+        self.output,self.parent,self.config_path = output,output.parent,config_path
+        self.gid = pwd.getpwnam('forge').pw_gid if forge_gid is None else forge_gid
+        safe_parents(output)
+        s = self.parent.lstat()
+        require(stat.S_ISDIR(s.st_mode) and s.st_uid == 0 and s.st_gid == self.gid and stat.S_IMODE(s.st_mode) == 0o750)
+        self.parent_id = {k:getattr(s,k) for k in ('st_dev','st_ino','st_mode','st_uid','st_gid')}
+        self.state_path,self.lock_path = self.parent/'.producer-state.json',self.parent/'.producer.lock'
+        self.c,self.config_record = load_config(config_path)
+        self.lock_fd = None
+    def __enter__(self):
+        try:
+            fd = os.open(self.lock_path,os.O_RDWR | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,0o600)
+            os.fchown(fd,0,0)
+        except FileExistsError:
+            fd = os.open(self.lock_path,os.O_RDWR | os.O_NOFOLLOW | os.O_NONBLOCK)
+        self.lock_fd = fd
+        try:
+            fcntl.flock(fd,fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.lock_record = record(self.lock_path,0)
+            exact_file(self.lock_record,0,0,0o600)
+            require(self.lock_record['identity'] == identity(os.fstat(fd)))
+            self.before_state = record(self.state_path,8192)
+            self.before_output = record(self.output,MAX_OUTPUT)
+            if self.before_state is None:
+                require(self.before_output is None)
+            else:
+                exact_file(self.before_state,0,0,0o600)
+                control = decode(read_recorded(self.state_path,self.before_state,8192))
+                require(set(control) == {'schema_version','snapshot'} and control['schema_version'] == 1
+                        and control['snapshot'] == self.before_output)
+                exact_file(self.before_output,0,self.gid,0o640)
+            self.guard()
+            return self
+        except BaseException:
+            os.close(fd)
+            self.lock_fd = None
+            raise
+    def __exit__(self,*_):
+        if self.lock_fd is not None:
+            os.close(self.lock_fd)
+            self.lock_fd = None
+    def guard(self):
+        s = self.parent.lstat()
+        require(self.parent.resolve() == self.parent and {k:getattr(s,k) for k in self.parent_id} == self.parent_id)
+        require(record(self.config_path,8192) == self.config_record)
+        require(record(self.lock_path,0) == self.lock_record and self.lock_record['identity'] == identity(os.fstat(self.lock_fd)))
+        require(record(self.output,MAX_OUTPUT) == self.before_output and record(self.state_path,8192) == self.before_state)
+    def replace(self,path,data,expected,group,mode):
+        self.guard()
+        require(record(path) == expected)
+        fd,temp = tempfile.mkstemp(prefix='.producer-',dir=self.parent)
+        owned = os.fstat(fd)
+        try:
+            with os.fdopen(fd,'wb') as f:
+                f.write(data);f.flush();os.fchown(f.fileno(),0,group);os.fchmod(f.fileno(),mode);os.fsync(f.fileno())
+            self.guard()
+            require(record(path) == expected)
+            if expected is None:
+                os.link(temp,path,follow_symlinks=False);os.unlink(temp)
+            else:
+                os.replace(temp,path)
+            post = record(path)
+            exact_file(post,0,group,mode)
+            require((post['identity']['st_dev'],post['identity']['st_ino']) == (owned.st_dev,owned.st_ino)
+                    and post['sha256'] == hashlib.sha256(data).hexdigest())
+            directory = os.open(self.parent,os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
+            return post
+        finally:
+            try:
+                s = os.lstat(temp)
+                if (s.st_dev,s.st_ino) == (owned.st_dev,owned.st_ino):
+                    os.unlink(temp)
+            except FileNotFoundError:
+                pass
+    def publish(self,snapshot):
+        raw = json.dumps(snapshot,separators=(',',':'),ensure_ascii=True,allow_nan=False).encode() + b'\n'
+        require(len(raw) <= MAX_OUTPUT)
+        try:
+            self.before_output = self.replace(self.output,raw,self.before_output,self.gid,0o640)
+            control = json.dumps({'schema_version':1,'snapshot':self.before_output},sort_keys=True).encode() + b'\n'
+            self.before_state = self.replace(self.state_path,control,self.before_state,0,0o600)
+            self.guard()
+        except Exception:
+            # No blind rollback: unknown targets are retained for operator review.
+            try:
+                fd,path = tempfile.mkstemp(prefix='.manual-recovery-',suffix='.json',dir=self.parent)
+                with os.fdopen(fd,'w') as f:
+                    json.dump({'schema_version':1,'status':'manual-recovery','unknown_targets_preserved':True},f)
+                    f.flush();os.fsync(f.fileno())
+            except Exception:
+                pass
+            raise
+
+def main():
+    os.umask(0o077)
+    require(os.geteuid() == 0 and len(sys.argv) == 1)
+    with Publisher() as publisher:
+        snapshot = observe(publisher.c)
+        publisher.guard()
+        publisher.publish(snapshot)
+        print(json.dumps({'published':True,'available':snapshot['available'],'host_count':len(snapshot['hosts'])}))
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception:
+        print('{"published":false,"error":"producer_refused"}',file=sys.stderr)
+        raise SystemExit(1)
