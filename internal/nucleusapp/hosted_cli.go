@@ -28,15 +28,17 @@ import (
 
 const hostedHelp = `NEBULA hosted control panel
 
-  nebula login [--url https://nebula.parallax.link] [--no-open]
+  nebula login [--url https://nebula.parallax.link] [--no-open] [--loopback]
   nebula logout
   nebula org list
   nebula org use ORGANIZATION_ID
   nebula cluster list [--org ORGANIZATION_ID] [--page 1]
   nebula cluster show CLUSTER_ID [--org ORGANIZATION_ID]
 
-Login uses browser consent, PKCE and an IPv4 loopback callback. It is separate
-from machine enrollment. API reads require current Nexus membership.
+Login shows a short code to approve in the NEBULA dashboard. The device proof
+stays on this machine; no localhost callback is needed. --loopback explicitly
+selects the older browser callback flow. Login is separate from machine enrollment.
+API reads require current Nexus membership.
 Credentials stay in a private hosted-auth.json file under NEBULA_HOME.
 Cluster provisioning commands are not available in this release.
 `
@@ -58,15 +60,17 @@ type hostedFile struct {
 	info  os.FileInfo
 }
 type hostedDiscovery struct {
-	SchemaVersion int      `json:"schema_version"`
-	Issuer        string   `json:"issuer"`
-	ClientID      string   `json:"client_id"`
-	Authorization string   `json:"authorization_endpoint"`
-	Token         string   `json:"token_endpoint"`
-	Revocation    string   `json:"revocation_endpoint"`
-	API           string   `json:"api_endpoint"`
-	CallbackPath  string   `json:"callback_path"`
-	Scopes        []string `json:"scopes_supported"`
+	SchemaVersion       int      `json:"schema_version"`
+	Issuer              string   `json:"issuer"`
+	ClientID            string   `json:"client_id"`
+	Authorization       string   `json:"authorization_endpoint"`
+	DeviceAuthorization string   `json:"device_authorization_endpoint,omitempty"`
+	Verification        string   `json:"verification_endpoint,omitempty"`
+	Token               string   `json:"token_endpoint"`
+	Revocation          string   `json:"revocation_endpoint"`
+	API                 string   `json:"api_endpoint"`
+	CallbackPath        string   `json:"callback_path"`
+	Scopes              []string `json:"scopes_supported"`
 }
 type hostedToken struct {
 	Access  string `json:"access_token"`
@@ -85,6 +89,7 @@ type hostedCLI struct {
 	output io.Writer
 	open   func(string) error
 	now    func() time.Time
+	sleep  func(context.Context, time.Duration) error
 }
 
 func hostedCommand(args []string) error {
@@ -300,11 +305,14 @@ func (c *hostedCLI) discovery(ctx context.Context, origin string) (hostedDiscove
 	if err != nil {
 		return d, err
 	}
-	if json.Unmarshal(data, &d) != nil {
+	if hostedDeviceDecode(data, &d) != nil {
 		return d, errors.New("invalid NEBULA CLI discovery")
 	}
 	if d.SchemaVersion != 1 || d.Issuer != origin || !hostedIdentifier.MatchString(d.ClientID) || d.Authorization != origin+"/oauth/authorize" || d.Token != origin+"/oauth/token" || d.Revocation != origin+"/api/v1/session/revoke" || d.API != origin+"/api/v1" || d.CallbackPath != "/oauth/callback" {
 		return d, errors.New("NEBULA discovery must keep all endpoints on the selected service")
+	}
+	if (d.DeviceAuthorization != "" || d.Verification != "") && (d.DeviceAuthorization != origin+"/oauth/device/code" || d.Verification != origin+"/dashboard/cli/device") {
+		return d, errors.New("NEBULA device discovery must keep both endpoints on the selected service")
 	}
 	read := false
 	for _, scope := range d.Scopes {
@@ -469,24 +477,32 @@ func (c *hostedCLI) organizations(ctx context.Context, file *hostedFile) ([]host
 func (c *hostedCLI) run(ctx context.Context, args []string) error {
 	if args[0] == "login" {
 		var origin string
-		var noOpen bool
+		var noOpen, loopback bool
 		rest, err := options("login", args[1:], func(f *flag.FlagSet) {
 			f.StringVar(&origin, "url", "https://nebula.parallax.link", "own hosted service origin")
-			f.BoolVar(&noOpen, "no-open", false, "print authorization URL only")
+			f.BoolVar(&noOpen, "no-open", false, "show sign-in instructions without opening a browser")
+			f.BoolVar(&loopback, "loopback", false, "explicitly use the older localhost callback flow")
 		})
 		if err != nil {
 			return err
 		}
 		if len(rest) > 0 {
-			return errors.New("usage: nebula login [--url HTTPS_ORIGIN] [--no-open]")
+			return errors.New("usage: nebula login [--url HTTPS_ORIGIN] [--no-open] [--loopback]")
 		}
 		origin, err = hostedOrigin(origin)
 		if err != nil {
 			return err
 		}
-		loginCtx, cancel := context.WithTimeout(ctx, 2*time.Minute)
+		timeout := 10 * time.Minute
+		if loopback {
+			timeout = 2 * time.Minute
+		}
+		loginCtx, cancel := context.WithTimeout(ctx, timeout)
 		defer cancel()
-		return c.login(loginCtx, origin, noOpen)
+		if loopback {
+			return c.login(loginCtx, origin, noOpen)
+		}
+		return c.deviceLogin(loginCtx, origin, noOpen)
 	}
 	file, err := c.load()
 	if err != nil {

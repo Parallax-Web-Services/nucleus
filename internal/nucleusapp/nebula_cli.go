@@ -10,10 +10,10 @@ import (
 	"github.com/Parallax-Web-Services/nucleus/cloud"
 )
 
-const NebulaVersion = "0.6.0-dev"
+const NebulaVersion = "0.6.1-dev"
 const NebulaHelp = `NEBULA 0.6 — Private fabric across your machines
 
-  nebula login [--url https://nebula.parallax.link] [--no-open]
+  nebula login [--url https://nebula.parallax.link] [--no-open] [--loopback]
   nebula logout
   nebula org list | use ORGANIZATION_ID
   nebula cluster list | show CLUSTER_ID
@@ -33,6 +33,9 @@ const NebulaHelp = `NEBULA 0.6 — Private fabric across your machines
   nebula network connect [--ui 127.0.0.1:0] [--no-open]
   nebula relay serve --issuer-public-key-file /absolute/public-key [--listen 127.0.0.1:8743]
   nebula version
+
+Hosted login shows a short code to approve in the NEBULA dashboard.
+Use --loopback only to explicitly select the older localhost callback flow.
 
 Network connect always uses the authenticated NEBULA relay and inner mTLS.
 Pair the fabric, enroll each machine in the same organization, and enable its
