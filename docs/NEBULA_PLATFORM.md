@@ -59,7 +59,7 @@ nebula app deploy / inspect / logs
 nebula operation inspect / watch
 ```
 
-User login needs a separately registered public PKCE client and private credential storage. NEXUS's disabled device grant is not a usable login mechanism. Machine enrollment remains a machine identity operation, not user authentication.
+User sign-in uses NEBULA's device-code flow through the hosted dashboard, with mandatory PKCE S256 and private local credential storage. The browser session authenticates through NEXUS; NEBULA's OAuth server issues read-only CLI credentials after user consent. This does not require enabling NEXUS's device grant. Machine enrollment separately approves a machine key; it does not sign in a user or create fabric membership.
 
 ## Kubernetes runtime and networking
 
@@ -83,7 +83,7 @@ A panel installation has its own enrolled identity. Account linking requires tru
 
 ## Billing and existing services
 
-Preserve the agreed Nucleus/Positronic machine-management prices. Do not silently include supplied compute, storage, control-plane capacity or supplier charges in the unlimited-machine allowance. NEBULA cluster prices remain an explicit product decision.
+NEBULA cluster management is included in Positronic's existing machine-management subscription: $99 per organization per month includes five machines, plus $29 per additional machine per month, or $299 per organization per month for unlimited managed machines. Enabling NEBULA does not create a separate subscription or a new charge. Parallax-supplied servers are billed separately; the unlimited allowance covers managed machine count, not supplied compute, storage or supplier charges.
 
 Do not repurpose current context/inference API keys for infrastructure administration. Add explicit scopes and fresh role/ownership checks. Keep provisioning credentials and privileged job workers separate from the existing model-worker protocol.
 
