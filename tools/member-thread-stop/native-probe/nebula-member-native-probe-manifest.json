@@ -1,0 +1,36 @@
+{
+  "af91_unchanged": true,
+  "connection_binding_established": false,
+  "direct_children_parent_death_sigkill_and_parent_race_check": true,
+  "local_static_checks_only": [
+    "gcc -std=c11 -Wall -Wextra -Werror -fsyntax-only -pthread",
+    "bash -n"
+  ],
+  "revision": 2,
+  "runtime_cases_executed": 0,
+  "schema_version": 1,
+  "source_files": {
+    "nebula-member-native-ownprobe.c": {
+      "bytes": 19620,
+      "mode": "0600",
+      "sha256": "55fce4531ce9e0f191c8983e41b5ac098926dbbd91a819678bc4a8c25008beb8"
+    },
+    "nebula-member-native-probe-plan.md": {
+      "bytes": 9537,
+      "mode": "0600",
+      "sha256": "1aaa6ea777078719adbe82d3fec21e4808434145a30e8f58d3ad63f6bb1c30ed"
+    },
+    "nebula-member-native-probe.sh": {
+      "bytes": 6778,
+      "mode": "0600",
+      "sha256": "91aeb298aeea3507fb32e34e766614011256910efd5eca431378374e59ae2a82"
+    },
+    "nebula-member-thread-stop.c": {
+      "bytes": 24490,
+      "mode": "0600",
+      "sha256": "af91d46f361e61ee552eeda78c897e21f5c633b282cc93926c322740e83fbfc9"
+    }
+  },
+  "ssh_staging_host_inventory_or_build_performed": false,
+  "status": "source_only_not_executed"
+}
