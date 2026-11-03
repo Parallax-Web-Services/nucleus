@@ -126,7 +126,7 @@ func hostedCommand(args []string) error {
 		return errors.New("another hosted NEBULA command is running")
 	}
 	defer syscall.Flock(fd, syscall.LOCK_UN)
-	client := &http.Client{Timeout: 15 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+	client := &http.Client{Timeout: 30 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	cli := &hostedCLI{home: home, client: client, output: os.Stdout, open: hostedOpenBrowser, now: time.Now}
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
