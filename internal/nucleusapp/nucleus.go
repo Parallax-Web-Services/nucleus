@@ -37,6 +37,8 @@ const Help = `Nucleus Alpha 0.5 — Private Fabric, NEBULA WAN and Opt-in Hosted
   nucleus members
   nucleus revoke NODE_ID
   nucleus snapshot
+  nucleus account connect --url PARALLAX_ORIGIN --code CONNECTION_CODE
+  nucleus account status | report [--once] | disconnect
   nucleus cloud connect [--url https://nucleus.parallax.link/dashboard] [--no-open]
   nucleus cloud run [--once] [--inference FILE] [--model-root DIR --allow-model-installs]
   nucleus cloud status
@@ -121,6 +123,8 @@ func runAtHome(home string, args []string, product string) error {
 	switch args[0] {
 	case "nebula":
 		return nebulaCommand(args[1:])
+	case "account":
+		return accountCommand(home, args[1:])
 	case "cloud":
 		return cloudCommandNamed(home, args[1:], product)
 	case "validate-models":
@@ -458,7 +462,10 @@ func serve(home string, args []string) error {
 		mu.Unlock()
 	}
 	updateSafe()
-	if _, err = dashboard.Start(ctx, ui, noOpen, func() (positronic.View, error) { mu.RLock(); defer mu.RUnlock(); return view, viewErr }); err != nil {
+	if owner {
+		startAccountReporting(ctx, home, func() (positronic.View, error) { mu.RLock(); defer mu.RUnlock(); return view, viewErr })
+	}
+	if _, err = dashboard.Start(ctx, ui, noOpen, func() (positronic.View, error) { mu.RLock(); defer mu.RUnlock(); return view, viewErr }, home); err != nil {
 		return err
 	}
 	go func() {

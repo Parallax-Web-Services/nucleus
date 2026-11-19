@@ -16,10 +16,11 @@ import (
 	"time"
 
 	resourcemap "github.com/Parallax-Web-Services/nucleus/apps/resource-map"
+	"github.com/Parallax-Web-Services/nucleus/cloud"
 	"github.com/Parallax-Web-Services/nucleus/positronic"
 )
 
-func Start(ctx context.Context, address string, noOpen bool, view func() (positronic.View, error)) (string, error) {
+func Start(ctx context.Context, address string, noOpen bool, view func() (positronic.View, error), accountHome ...string) (string, error) {
 	host, _, err := net.SplitHostPort(address)
 	if err != nil || host != "127.0.0.1" {
 		return "", errors.New("browser UI must bind 127.0.0.1:PORT")
@@ -53,9 +54,27 @@ func Start(ctx context.Context, address string, noOpen bool, view func() (positr
 			http.Error(w, "no request body", http.StatusBadRequest)
 			return
 		}
-		if r.URL.Path == "/api/v1/fabric" {
+		if r.URL.Path == "/api/v1/fabric" || r.URL.Path == "/api/v1/account" {
 			if subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")), []byte("Bearer "+token)) != 1 {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
+				return
+			}
+			if r.URL.Path == "/api/v1/account" {
+				w.Header().Set("Content-Type", "application/json")
+				result := map[string]any{"linked": false, "standalone": true}
+				if len(accountHome) > 0 && accountHome[0] != "" {
+					binding, err := cloud.LoadAccountBinding(accountHome[0])
+					if err != nil && !errors.Is(err, cloud.ErrAccountNotConnected) {
+						http.Error(w, "Account link status unavailable; local cluster operation is independent.", http.StatusServiceUnavailable)
+						return
+					}
+					if binding != nil {
+						result["linked"] = true
+						result["name"] = binding.Name
+						result["url"] = binding.Origin + "/clusters"
+					}
+				}
+				_ = json.NewEncoder(w).Encode(result)
 				return
 			}
 			data, err := view()

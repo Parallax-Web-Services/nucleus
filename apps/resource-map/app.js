@@ -259,3 +259,30 @@ if (!token) {
 }
 const interval = setInterval(() => void refresh(), 2000);
 window.addEventListener("pagehide", () => { stopped = true; clearInterval(interval); activeRequest?.abort(); });
+
+let lastAccountRefresh = 0;
+async function refreshAccount() {
+  if (!token || stopped || Date.now() - lastAccountRefresh < 15000) return;
+  lastAccountRefresh = Date.now();
+  try {
+    const response = await fetch('/api/v1/account', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw new Error('Account status unavailable');
+    const data = await response.json();
+    if (data.linked && typeof data.url === 'string') {
+      const destination = new URL(data.url);
+      if (destination.protocol !== 'https:' && !(destination.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(destination.hostname))) throw new Error('Invalid account origin');
+      text('account-title', 'Optional Parallax account link');
+      text('account-link-status', `Link configured for ${data.name || 'this cluster'}. Open Parallax to see whether inventory reports are current. Local cluster operation remains independent.`);
+      byId('account-link').href = destination.href;
+      byId('account-link').hidden = false;
+    } else {
+      text('account-title', 'Standalone cluster');
+      text('account-link-status', 'No Parallax account is required. To link this existing cluster, create a connection code under Clusters in your signed-in account and run nucleus account connect on the coordinator.');
+      byId('account-link').hidden = true;
+    }
+  } catch {
+    text('account-link-status', 'Account link status is unavailable. Local cluster operation does not depend on Parallax.');
+    byId('account-link').hidden = true;
+  }
+}
+if (token) { void refreshAccount(); setInterval(() => void refreshAccount(), 15000); }
