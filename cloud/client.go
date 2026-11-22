@@ -130,6 +130,18 @@ func parseBase(raw string) (serviceBase, error) {
 }
 
 func (c *Client) Connect(ctx context.Context, notify func(EnrollmentNotice)) (*Binding, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, errors.New("cannot determine node hostname")
+	}
+	return c.ConnectNamed(ctx, hostname, notify)
+}
+
+// ConnectNamed enrolls with an operator-visible device label. The signing key remains the identity.
+func (c *Client) ConnectNamed(ctx context.Context, name string, notify func(EnrollmentNotice)) (*Binding, error) {
+	if strings.TrimSpace(name) == "" || len(name) > 128 || strings.ContainsAny(name, "\r\n\x00") {
+		return nil, errors.New("invalid device name")
+	}
 	if _, err := LoadBinding(c.home); err == nil {
 		return nil, errors.New("hosted registration already exists; inspect cloud status or disconnect first")
 	} else if !errors.Is(err, ErrNotRegistered) {
@@ -138,10 +150,6 @@ func (c *Client) Connect(ctx context.Context, notify func(EnrollmentNotice)) (*B
 	state, publicKey, err := fabric.CloudIdentity(c.home)
 	if err != nil {
 		return nil, err
-	}
-	hostname, err := os.Hostname()
-	if err != nil {
-		return nil, errors.New("cannot determine node hostname")
 	}
 	var fabricID *string
 	if state.FabricID != "" {
@@ -155,7 +163,7 @@ func (c *Client) Connect(ctx context.Context, notify func(EnrollmentNotice)) (*B
 		Platform  string  `json:"platform"`
 		Arch      string  `json:"arch"`
 		Version   string  `json:"version"`
-	}{state.NodeID, base64.StdEncoding.EncodeToString(publicKey), fabricID, hostname, runtime.GOOS, runtime.GOARCH, Version})
+	}{state.NodeID, base64.StdEncoding.EncodeToString(publicKey), fabricID, name, runtime.GOOS, runtime.GOARCH, Version})
 	if err != nil {
 		return nil, err
 	}
