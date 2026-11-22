@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Parallax-Web-Services/nucleus/internal/nucleusapp"
+	"github.com/Parallax-Web-Services/nucleus/cli/nebula"
 )
 
 func main() {
-	if err := nucleusapp.RunNebula(os.Args[1:]); err != nil {
+	if err := nebula.Run(os.Args[1:]); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
-			fmt.Print(nucleusapp.NebulaHelp)
+			fmt.Print(nebula.Help)
 			return
 		}
 		fmt.Fprintln(os.Stderr, "nebula:", err)

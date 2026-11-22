@@ -8,6 +8,8 @@ Version 0.4 adds explicitly opted-in hosted model work to the outbound NEXUS-bac
 
 Positronic tracks heartbeats and available inventory. A separate, authenticated loopback resource map displays the fabric. CPU inference is an explicit opt-in extension; see [CPU inference](docs/CPU_INFERENCE.md) and [Meld migration](docs/MELD_INFERENCE.md). Hosted work accepts typed generation/model jobs, never arbitrary remote commands. The node opens no public listener. Media runtime documentation describes a separate opt-in path; packaging does not assert media quality or readiness.
 
+The standalone [NEBULA repository](https://github.com/Parallax-Web-Services/nebula) builds its CLI against this Go module. The in-tree command remains available for existing NUCLEUS build and package scripts.
+
 ## Build
 
 Go 1.23+ and Linux/WSL2 are required. The NEBULA transport uses [coder/websocket](https://github.com/coder/websocket) v1.8.15 under the ISC license; its notice is included in portable bundles.
