@@ -1,0 +1,289 @@
+{
+  "schema_version": 2,
+  "status": "core_workflow_validated_and_activated_locally",
+  "success_criterion": "Replace Modal for ordinary Meld Studio image generation and visual review",
+  "core_workflow_passed": true,
+  "local_activation_verified": true,
+  "scope": "Real ordinary Meld recipe submission and GenerateRender, two pinned photographic references, Google learned appearance guidance, actual calibrated Gemma review, durable progress, selected artifact storage and access checks. Optional advanced workloads are explicitly unavailable.",
+  "recorded_at_utc": "2026-11-02T17:20:07+00:00",
+  "model_catalogs": [
+    {
+      "path": "runtimes/meld/catalog/sdxl-readout-depth.json",
+      "manifest_sha256": "c266e028703bfea92054aecb470c13e61977e48ab0596cc357a429244170bf52"
+    },
+    {
+      "path": "runtimes/meld/catalog/gemma-3-4b-it-q4-k-m.json",
+      "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc"
+    }
+  ],
+  "actual_generation_manifest_sha256": "c266e028703bfea92054aecb470c13e61977e48ab0596cc357a429244170bf52",
+  "actual_review_manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+  "generation_backend": "sdxl_readout",
+  "generation_model": "sdxl-readout-depth",
+  "review_model": "gemma-3-4b-it-q4-k-m",
+  "review_revision": "appearance-first-v2",
+  "request": {
+    "size": "512x512",
+    "requested_steps": 30,
+    "operator_configured_reported_img2img_strength": 1,
+    "expected_seed": 7,
+    "actual_generation_seed": 7,
+    "weights_percent": [
+      65,
+      35
+    ],
+    "user_prompt": "Close-up photographic portrait of one fictional adult woman, realistic skin, natural makeup, calm expression, soft studio lighting, neutral gray background. No text."
+  },
+  "sources": [
+    {
+      "sha256": "88431cd9653ccd539741b555fb0a46b61558b301d4110412b5bc28b5e3ea6cb5",
+      "credit": "NASA, Eileen Collins portrait; distributed as scikit-image sample data",
+      "license": "public-domain/no-known-copyright-restrictions",
+      "source_url": "https://raw.githubusercontent.com/scikit-image/scikit-image/e8a42ba85aaf5fd9322ef9ca51bc21063b22fcae/skimage/data/astronaut.png"
+    },
+    {
+      "sha256": "563cc412178ca2e39aad61271126424db06cc4389ce6d56c02373f9351f07499",
+      "credit": "NASA, official astronaut portrait of Nancy Currie",
+      "license": "NASA-credited photograph, local research/test use under NASA media guidelines; no endorsement",
+      "source_url": "https://science.nasa.gov/wp-content/uploads/2022/05/nancy-currie-jpg.webp"
+    }
+  ],
+  "model_calls": [
+    {
+      "path": "/v1/generations",
+      "status": 200,
+      "backend": "sdxl_readout",
+      "model": "sdxl-readout-depth",
+      "manifest_sha256": "c266e028703bfea92054aecb470c13e61977e48ab0596cc357a429244170bf52",
+      "nonce_matches": true,
+      "result_hash_matches": true
+    },
+    {
+      "path": "/v1/reviews",
+      "status": 200,
+      "backend": "llama_cpp_vlm",
+      "model": "gemma-3-4b-it-q4-k-m",
+      "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+      "nonce_matches": true,
+      "result_hash_matches": true
+    }
+  ],
+  "learned_guidance": {
+    "conditioning": "generic learned appearance; not face identity embeddings",
+    "basis_points": [
+      6500,
+      3500
+    ],
+    "appearance_strength": 0.6,
+    "guidance_step_cap": 4,
+    "optimized_step_count": 4,
+    "optimized_steps": [
+      {
+        "callback_index": 0,
+        "scheduler_position": 1,
+        "timestep": 925.0,
+        "sigma": 9.543585777282715,
+        "appearance_cosine_loss": 0.03825953230261803,
+        "per_source_cosine_loss": [
+          0.048905547708272934,
+          0.018488356843590736
+        ],
+        "loss_before_update": 0.022955719381570816,
+        "gradient_norm_before_clip": 5.153757956577465e-05,
+        "latent_delta_l2": 1.4228851795196533,
+        "latent_delta_max": 0.011945247650146484,
+        "loss_measurement": "before update; no post-update forward was performed",
+        "optimizer_learning_rate": 0.012
+      },
+      {
+        "callback_index": 8,
+        "scheduler_position": 9,
+        "timestep": 661.0,
+        "sigma": 2.862931728363037,
+        "appearance_cosine_loss": 0.06667871028184891,
+        "per_source_cosine_loss": [
+          0.03388425335288048,
+          0.12758269906044006
+        ],
+        "loss_before_update": 0.040007226169109344,
+        "gradient_norm_before_clip": 0.00025988559355027974,
+        "latent_delta_l2": 1.4876132011413574,
+        "latent_delta_max": 0.01199352741241455,
+        "loss_measurement": "before update; no post-update forward was performed",
+        "optimizer_learning_rate": 0.012
+      },
+      {
+        "callback_index": 16,
+        "scheduler_position": 17,
+        "timestep": 397.0,
+        "sigma": 1.1529886722564697,
+        "appearance_cosine_loss": 0.07685695588588715,
+        "per_source_cosine_loss": [
+          0.07736494392156601,
+          0.07591354101896286
+        ],
+        "loss_before_update": 0.046114176511764526,
+        "gradient_norm_before_clip": 0.006061213556677103,
+        "latent_delta_l2": 1.529507040977478,
+        "latent_delta_max": 0.011999845504760742,
+        "loss_measurement": "before update; no post-update forward was performed",
+        "optimizer_learning_rate": 0.012
+      },
+      {
+        "callback_index": 24,
+        "scheduler_position": 25,
+        "timestep": 133.0,
+        "sigma": 0.4178798794746399,
+        "appearance_cosine_loss": 0.046833209693431854,
+        "per_source_cosine_loss": [
+          0.04345771297812462,
+          0.05310199782252312
+        ],
+        "loss_before_update": 0.028099926188588142,
+        "gradient_norm_before_clip": 0.0018207046668976545,
+        "latent_delta_l2": 1.5220601558685303,
+        "latent_delta_max": 0.011999249458312988,
+        "loss_measurement": "before update; no post-update forward was performed",
+        "optimizer_learning_rate": 0.012
+      }
+    ],
+    "status": "completed"
+  },
+  "visual_review": {
+    "appearance_assessment": {
+      "appearance": "photographic",
+      "evidence": "Soft shading, subtle skin texture, defined facial features, orange knit sweater, blurred background, and gentle lighting create a realistic portrait."
+    },
+    "verdict": {
+      "accepted": true,
+      "issues": [],
+      "summary": "The image is a photorealistic editorial photograph of one adult woman in an orange knit sweater against a neutral gray background. The lighting is soft and studio-like, and the woman has a calm expression and natural makeup. The scene matches the brief's requirements for a close-up portrait, one person, and neutral body language.",
+      "quality_score": 95
+    },
+    "human_photographic_quality_passed": true,
+    "human_notes": "Coherent one-person photographic portrait, ordinary opaque clothing and anatomy, no visible illustration outlines or unwanted text. This is one visual acceptance case; it is not a face-ID or exact trait-percentage guarantee."
+  },
+  "workflow": {
+    "phpunit_result": "passed",
+    "assertions": 42,
+    "render_status": "succeeded",
+    "authorized_stream_sha256": "43f242c0cefdd6841fd8c8323d02f627e877c174dc003c0d5374e03e092d4718",
+    "unrelated_user_artifact_access_denied": true,
+    "progress_status": "succeeded",
+    "completed_frames": 1
+  },
+  "measurements": {
+    "hardware": "AMD Ryzen5 5600X,64GB-class Linux/WSL node",
+    "cpu_threads_requested": 4,
+    "device": "cpu",
+    "gpu_offload": false,
+    "full_runner_monotonic_seconds": 750.9719280159916,
+    "php_test_report_wall_seconds": 750.5247809886932,
+    "generation": {
+      "elapsed_ms": 628111.667,
+      "child_exit_code": 0,
+      "threads": 4,
+      "address_space_limit_bytes": 42949672960,
+      "device": "cpu",
+      "sampled_peak_tree_rss_bytes": 19850629120,
+      "sampled_peak_leader_vm_bytes": 27707969536,
+      "leader_vm_hwm_bytes": 19885707264,
+      "status": "completed"
+    },
+    "review": {
+      "elapsed_ms": 122028.432,
+      "child_exit_code": 0,
+      "threads": 4,
+      "address_space_limit_bytes": 8589934592,
+      "device": "cpu",
+      "sampled_peak_tree_rss_bytes": 5568802816,
+      "sampled_peak_leader_vm_bytes": 44236800,
+      "leader_vm_hwm_bytes": 29216768,
+      "status": "completed"
+    },
+    "maximum_sampled_aggregate_rss_bytes": 19854102528,
+    "rss_note": "Sampled sum of owned gateway/runtime process-tree RSS; shared pages may be counted repeatedly. Not exact physical RAM use. Address-space caps are separate from resident memory."
+  },
+  "download_budget": {
+    "new_model_bytes": 10351321241,
+    "authorized_cap_bytes": 12000000000
+  },
+  "selected_artifact": {
+    "path": "docs/validation/meld-cpu-portrait-512.png",
+    "sha256": "43f242c0cefdd6841fd8c8323d02f627e877c174dc003c0d5374e03e092d4718",
+    "size": "512x512"
+  },
+  "review_calibration": {
+    "result": "passed",
+    "controls": 3,
+    "negative_illustrations_rejected": 2,
+    "positive_photograph_accepted": 1,
+    "policy": "Image-only photographic appearance assessment precedes brief review; no camera-authenticity claim; secondary issue labels remain imperfect."
+  },
+  "queue_validation": {
+    "database_queue": "nucleus-media",
+    "worker_count": 1,
+    "tensor_free_serial_burst_progress_test": "passed",
+    "live_schema_migrations_applied": 29,
+    "live_pending_migrations": 0,
+    "production_database_migrations_performed": false
+  },
+  "prior_controls": "docs/validation/meld-cpu-controls-2026-11-02.json",
+  "limits": [
+    "Current selected profile output512x512,1\u20134 reference images,4CPUthreads and one executing model; substantial RAM required.",
+    "Generic learned appearance guidance is not a face-recognition embedding model and does not guarantee exact source identity or trait percentages.",
+    "Morphology/anatomy anchors/turnarounds/enhancement/video/3D remain unavailable in this profile. Media is coordinator-local, not remote image-worker placement.",
+    "Burst queue serialization is tested with real Laravel queue execution and tensor-free model responses; the real quality case here is one single-shot frame.",
+    "HTTP client-disconnect cleanup has real model evidence; original Meld UI has no cancellation action."
+  ],
+  "activation": {
+    "services": [
+      {
+        "Id": "nucleus-meld-8273b9e8e491-generation.service",
+        "ActiveState": "active",
+        "SubState": "running",
+        "UnitFileState": "enabled",
+        "Result": "success"
+      },
+      {
+        "Id": "nucleus-meld-8273b9e8e491-review.service",
+        "ActiveState": "active",
+        "SubState": "running",
+        "UnitFileState": "enabled",
+        "Result": "success"
+      },
+      {
+        "Id": "nucleus-meld-8273b9e8e491-gateway.service",
+        "ActiveState": "active",
+        "SubState": "running",
+        "UnitFileState": "enabled",
+        "Result": "success"
+      },
+      {
+        "Id": "nucleus-meld-8273b9e8e491-worker.service",
+        "ActiveState": "active",
+        "SubState": "running",
+        "UnitFileState": "enabled",
+        "Result": "success"
+      }
+    ],
+    "loaded_app_profile_preflight": "passed",
+    "authenticated_pinned_service_health": "passed",
+    "singleton_worker_lock_held": true,
+    "app_environment_updated_with_private_rollback": true,
+    "configuration_cache_cleared": true,
+    "database_migrations_performed": false,
+    "generation_http_timeout_seconds": 1800,
+    "review_http_timeout_seconds": 600,
+    "review_transport_retries": 0,
+    "generation_steps": 30,
+    "guidance_scale": 5,
+    "configured_review_attempts": 1,
+    "burst_candidate_pool_bound": 2,
+    "burst_worst_case_http_budget_seconds": 4800,
+    "worker_timeout_seconds": 5400,
+    "queue_retry_after_seconds": 5460,
+    "output_max_pixels": 262144,
+    "new_model_calls_during_activation": 0
+  }
+}

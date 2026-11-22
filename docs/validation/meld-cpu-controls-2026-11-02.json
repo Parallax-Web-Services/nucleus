@@ -1,0 +1,418 @@
+{
+  "schema_version": 1,
+  "status": "cpu_workflow_verified_visual_quality_failed",
+  "success_criterion": "Replace Modal in Meld generation/review workflow",
+  "success_criterion_met": false,
+  "scope": "One coordinator-local CPU node; actual Meld recipe submission and GenerateRender through Nucleus to SDXL img2img and Gemma 3 vision review. Synthetic nonprivate fixtures only.",
+  "hardware": {
+    "cpu": "AMD Ryzen5 5600X",
+    "physical_cores": 6,
+    "logical_cpus": 12,
+    "installed_ram_gib_approx": 62.75,
+    "environment": "Linux/WSL Ubuntu"
+  },
+  "execution": {
+    "requested_cpu_threads": 2,
+    "gpu_used": false,
+    "model_offload_layers": 0,
+    "multimodal_projector_offload": false,
+    "llama_model_operation_kv_offload": false,
+    "concurrent_models": 1,
+    "host_memory_reserve_bytes": 4294967296,
+    "generation_address_space_limit_bytes": 34359738368,
+    "review_address_space_limit_bytes": 8589934592,
+    "external_model_api_used": false,
+    "modal_transport_enabled": false,
+    "soft_acceptance_enabled": false,
+    "observed_cpu_cli_settings_verified": true,
+    "owned_acceptance_services_stopped": true
+  },
+  "model_catalogs": [
+    {
+      "path": "runtimes/meld/catalog/sdxl-base-1.0-fp16.json",
+      "manifest_sha256": "59de40b8cf15da68e1ab7295fe842ad67d9534e449708ca5a71c17bebff3c39e",
+      "model": "sdxl-base-1.0-img2img",
+      "artifact_count": 18,
+      "total_bytes": 6941187536
+    },
+    {
+      "path": "runtimes/meld/catalog/gemma-3-4b-it-q4-k-m.json",
+      "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+      "model": "gemma-3-4b-it-q4-k-m",
+      "artifact_count": 2,
+      "total_bytes": 3341008960
+    }
+  ],
+  "newly_downloaded_model_bytes": 10282196496,
+  "authorized_download_cap_bytes": 12000000000,
+  "gemma_disclosure_exception": {
+    "scope": "Exact two reviewed catalog artifacts only",
+    "lineage_complete": false,
+    "basis": "Explicit operator acceptance of Google published lineage; undisclosed internal teacher/reward checkpoint identities remain unknown.",
+    "blocked_origins_and_declared_derivatives_still_rejected": true
+  },
+  "measurement_notes": [
+    "RSS is sampled sum across three owned runtime/gateway process trees; shared pages can be counted repeatedly. It is not physical RAM usage or an exact aggregate high-water mark.",
+    "Kernel leader VmHWM and address-space limits are separate from sampled RSS. Address-space budgets are not resident-memory measurements.",
+    "Test report elapsed uses PHP wall clock; runner elapsed uses Python monotonic clock. Both are retained because WSL clock adjustment can make them differ.",
+    "Requested steps differ from executed img2img denoising iterations when strength is below 1."
+  ],
+  "runs": [
+    {
+      "run": "8-step-protocol-pilot",
+      "recorded_at_utc": "2026-11-02T14:52:30+00:00",
+      "size": "512x512",
+      "requested_steps": 8,
+      "operator_configured_img2img_strength": 0.65,
+      "render_status": "succeeded",
+      "phpunit_exit_code": 1,
+      "complete_acceptance_test_passed": false,
+      "test_report_wall_clock_elapsed_seconds": 307.3154990673065,
+      "runner_monotonic_elapsed_seconds": 278.33795615599956,
+      "max_sampled_aggregate_runtime_rss_bytes": 16862269440,
+      "verification": {
+        "go_format_vet_race_suite": "passed",
+        "tensor_free_runtime_tests": 13,
+        "profile_helper_regression_tests": 3,
+        "real_meld_workflow_tests": 1,
+        "real_meld_workflow_assertions": 39,
+        "real_meld_workflow_result": "passed",
+        "human_visual_quality_result": "failed",
+        "legacy_policy_tests": 104,
+        "legacy_policy_assertions": 1109,
+        "scoped_php_pint": "passed"
+      },
+      "source_sha256": [
+        "fa32e985cdcd17c80236cfe1a5d9d2f33bf08256d66306a0b53e742fe42238bd",
+        "28f9a53382a2aa6fb9bea02bab2060abd840b46580640db5959c73eab7eb61fe"
+      ],
+      "candidate_sha256": [
+        "ab6cb95519b148d7131e370ad8467952a18153670cd7dfa6f7ed57c8fb14e0c5"
+      ],
+      "selected_output_sha256": "ab6cb95519b148d7131e370ad8467952a18153670cd7dfa6f7ed57c8fb14e0c5",
+      "model_calls": [
+        {
+          "path": "/v1/generations",
+          "status": 200,
+          "backend": "sdxl_img2img",
+          "model": "sdxl-base-1.0-img2img",
+          "manifest_sha256": "59de40b8cf15da68e1ab7295fe842ad67d9534e449708ca5a71c17bebff3c39e",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        },
+        {
+          "path": "/v1/reviews",
+          "status": 200,
+          "backend": "llama_cpp_vlm",
+          "model": "gemma-3-4b-it-q4-k-m",
+          "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        }
+      ],
+      "actual_review": {
+        "accepted": true,
+        "review_status": "accepted",
+        "quality_score": 95,
+        "issues": [],
+        "summary": "The image depicts a single, stylized headshot of a woman, meeting the brief's requirements for a neutral background, natural anatomy, and simple studio headshot."
+      },
+      "notes": [
+        "Actual review accepted and output was persisted and streamed, but the test failed on its obsolete403 expectation; the application deliberately returns404 for unrelated users.",
+        "Human visual inspection found an obviously illustrated face. This accepted verdict is NOT evidence of production visual quality or reviewer reliability."
+      ]
+    },
+    {
+      "run": "8-step-rejection",
+      "recorded_at_utc": "2026-11-02T15:02:23+00:00",
+      "size": "512x512",
+      "requested_steps": 8,
+      "operator_configured_img2img_strength": 0.65,
+      "render_status": "failed",
+      "phpunit_exit_code": 1,
+      "complete_acceptance_test_passed": false,
+      "test_report_wall_clock_elapsed_seconds": 335.85052609443665,
+      "runner_monotonic_elapsed_seconds": 308.0868036799948,
+      "max_sampled_aggregate_runtime_rss_bytes": 17807306752,
+      "verification": {
+        "go_format_vet_race_suite": "passed",
+        "tensor_free_runtime_tests": 13,
+        "profile_helper_regression_tests": 3,
+        "real_meld_workflow_tests": 1,
+        "real_meld_workflow_assertions": 39,
+        "real_meld_workflow_result": "passed",
+        "human_visual_quality_result": "failed",
+        "legacy_policy_tests": 104,
+        "legacy_policy_assertions": 1109,
+        "scoped_php_pint": "passed"
+      },
+      "source_sha256": [
+        "fa32e985cdcd17c80236cfe1a5d9d2f33bf08256d66306a0b53e742fe42238bd",
+        "28f9a53382a2aa6fb9bea02bab2060abd840b46580640db5959c73eab7eb61fe"
+      ],
+      "candidate_sha256": [
+        "a233f748a446ea514b4e5cd5cfd118faf506766cc569fa89a43104a5eebc27d3"
+      ],
+      "selected_output_sha256": null,
+      "model_calls": [
+        {
+          "path": "/v1/generations",
+          "status": 200,
+          "backend": "sdxl_img2img",
+          "model": "sdxl-base-1.0-img2img",
+          "manifest_sha256": "59de40b8cf15da68e1ab7295fe842ad67d9534e449708ca5a71c17bebff3c39e",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        },
+        {
+          "path": "/v1/reviews",
+          "status": 200,
+          "backend": "llama_cpp_vlm",
+          "model": "gemma-3-4b-it-q4-k-m",
+          "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        }
+      ],
+      "actual_review": {
+        "accepted": false,
+        "review_status": "rejected",
+        "quality_score": 20,
+        "issues": [
+          "composition_mismatch",
+          "extra_or_missing_parts"
+        ],
+        "summary": "The image is a simple, flat illustration of a face, not a photorealistic editorial photograph as requested. It lacks a full body, a neutral background, and realistic skin, and includes only one part of a person."
+      },
+      "notes": [
+        "After correcting the ownership assertion, actual review rejected the illustrated image. No final output was selected."
+      ]
+    },
+    {
+      "run": "30-step-strength-0.65",
+      "recorded_at_utc": "2026-11-02T15:19:45+00:00",
+      "size": "512x512",
+      "requested_steps": 30,
+      "operator_configured_img2img_strength": 0.65,
+      "render_status": "failed",
+      "phpunit_exit_code": 1,
+      "complete_acceptance_test_passed": false,
+      "test_report_wall_clock_elapsed_seconds": 642.8570189476013,
+      "runner_monotonic_elapsed_seconds": 583.4536390049616,
+      "max_sampled_aggregate_runtime_rss_bytes": 20002521088,
+      "verification": {
+        "go_format_vet_race_suite": "passed",
+        "tensor_free_runtime_tests": 13,
+        "profile_helper_regression_tests": 3,
+        "real_meld_workflow_tests": 1,
+        "real_meld_workflow_assertions": 39,
+        "real_meld_workflow_result": "passed",
+        "human_visual_quality_result": "failed",
+        "legacy_policy_tests": 104,
+        "legacy_policy_assertions": 1109,
+        "scoped_php_pint": "passed"
+      },
+      "source_sha256": [
+        "335d0042536fa34c03071ae475e98e3574628e1b9180f02b8289fb14a57f5887",
+        "20610bdd9a02f48182ea8ed9245eff2fa1995cdc230d0c2b8a434807128b52d0"
+      ],
+      "candidate_sha256": [
+        "31af330c984c8f430ece8c95c7656b6c7b489fd080a4ea6dd643291ec0f3c2ac"
+      ],
+      "selected_output_sha256": null,
+      "model_calls": [
+        {
+          "path": "/v1/generations",
+          "status": 200,
+          "backend": "sdxl_img2img",
+          "model": "sdxl-base-1.0-img2img",
+          "manifest_sha256": "59de40b8cf15da68e1ab7295fe842ad67d9534e449708ca5a71c17bebff3c39e",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        },
+        {
+          "path": "/v1/reviews",
+          "status": 200,
+          "backend": "llama_cpp_vlm",
+          "model": "gemma-3-4b-it-q4-k-m",
+          "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        }
+      ],
+      "actual_review": {
+        "accepted": false,
+        "review_status": "rejected",
+        "quality_score": 20,
+        "issues": [
+          "composition_mismatch",
+          "extra_or_missing_parts"
+        ],
+        "summary": "The image is a stylized cartoon character, not a photorealistic editorial photograph as requested. It lacks realistic skin and anatomical detail, and includes extra parts (clothing) that were not requested."
+      },
+      "notes": [
+        "Two synthetic GD full-body figure sources. Actual review rejected cartoon styling; no final output was selected.",
+        "The style observation is supported by human inspection; the review claim that clothing was unrequested conflicts with the brief."
+      ],
+      "generation_runtime_measurements": {
+        "elapsed_ms": 467360.671,
+        "child_exit_code": 0,
+        "threads": 2,
+        "address_space_limit_bytes": 34359738368,
+        "device": "cpu",
+        "sampled_peak_tree_rss_bytes": 19811581952,
+        "sampled_peak_leader_vm_bytes": 26901217280,
+        "leader_vm_hwm_bytes": 19881734144,
+        "status": "completed"
+      },
+      "review_runtime_measurements": {
+        "elapsed_ms": 115288.206,
+        "child_exit_code": 0,
+        "threads": 2,
+        "address_space_limit_bytes": 8589934592,
+        "device": "cpu",
+        "sampled_peak_tree_rss_bytes": 5505470464,
+        "sampled_peak_leader_vm_bytes": 44060672,
+        "leader_vm_hwm_bytes": 28618752,
+        "status": "completed"
+      }
+    },
+    {
+      "run": "30-step-strength-0.85",
+      "recorded_at_utc": "2026-11-02T15:40:01+00:00",
+      "size": "512x512",
+      "requested_steps": 30,
+      "operator_configured_img2img_strength": 0.85,
+      "render_status": "succeeded",
+      "phpunit_exit_code": 0,
+      "complete_acceptance_test_passed": true,
+      "test_report_wall_clock_elapsed_seconds": 591.8282339572906,
+      "runner_monotonic_elapsed_seconds": 534.7701668689842,
+      "max_sampled_aggregate_runtime_rss_bytes": 19831263232,
+      "verification": {
+        "go_format_vet_race_suite": "passed",
+        "tensor_free_runtime_tests": 13,
+        "profile_helper_regression_tests": 3,
+        "real_meld_workflow_tests": 1,
+        "real_meld_workflow_assertions": 39,
+        "real_meld_workflow_result": "passed",
+        "human_visual_quality_result": "failed",
+        "legacy_policy_tests": 104,
+        "legacy_policy_assertions": 1109,
+        "scoped_php_pint": "passed"
+      },
+      "source_sha256": [
+        "335d0042536fa34c03071ae475e98e3574628e1b9180f02b8289fb14a57f5887",
+        "20610bdd9a02f48182ea8ed9245eff2fa1995cdc230d0c2b8a434807128b52d0"
+      ],
+      "candidate_sha256": [
+        "4cdc154106c62b809d912e522c70cf9f9311c27781b116ac4f2feed7f7561c94"
+      ],
+      "selected_output_sha256": "4cdc154106c62b809d912e522c70cf9f9311c27781b116ac4f2feed7f7561c94",
+      "model_calls": [
+        {
+          "path": "/v1/generations",
+          "status": 200,
+          "backend": "sdxl_img2img",
+          "model": "sdxl-base-1.0-img2img",
+          "manifest_sha256": "59de40b8cf15da68e1ab7295fe842ad67d9534e449708ca5a71c17bebff3c39e",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        },
+        {
+          "path": "/v1/reviews",
+          "status": 200,
+          "backend": "llama_cpp_vlm",
+          "model": "gemma-3-4b-it-q4-k-m",
+          "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+          "nonce_matches": true,
+          "result_hash_matches": true
+        }
+      ],
+      "actual_review": {
+        "accepted": true,
+        "review_status": "accepted",
+        "quality_score": 95,
+        "issues": [],
+        "summary": "The image meets the brief requirements: a photorealistic editorial photograph of one adult woman in plain opaque clothes, centered in a neutral studio with natural anatomy and realistic skin."
+      },
+      "notes": [
+        "Same synthetic full-body source fixture and unchanged actual review gate; higher strength is an explicit experiment and reduces source fidelity.",
+        "Operator strength is report metadata; the independently captured generator command line records --strength 0.85.",
+        "The ordinary workflow test passed 39 assertions, but human inspection found an illustration, contradicting the Gemma photorealistic verdict. This does not pass visual quality acceptance."
+      ],
+      "generation_runtime_measurements": {
+        "elapsed_ms": 448910.281,
+        "child_exit_code": 0,
+        "threads": 2,
+        "address_space_limit_bytes": 34359738368,
+        "device": "cpu",
+        "sampled_peak_tree_rss_bytes": 19745746944,
+        "sampled_peak_leader_vm_bytes": 26787221504,
+        "leader_vm_hwm_bytes": 19876413440,
+        "status": "completed"
+      },
+      "review_runtime_measurements": {
+        "elapsed_ms": 83914.584,
+        "child_exit_code": 0,
+        "threads": 2,
+        "address_space_limit_bytes": 8589934592,
+        "device": "cpu",
+        "sampled_peak_tree_rss_bytes": 5505888256,
+        "sampled_peak_leader_vm_bytes": 44060672,
+        "leader_vm_hwm_bytes": 28692480,
+        "status": "completed"
+      },
+      "human_visual_quality_passed": false,
+      "human_visual_assessment": "The selected image remains visibly illustrated, with drawn outlines and flat shading. The actual model accepted verdict is a false positive for the requested photorealism.",
+      "authorized_stream_sha256": "4cdc154106c62b809d912e522c70cf9f9311c27781b116ac4f2feed7f7561c94",
+      "unrelated_user_artifact_access_denied": true
+    }
+  ],
+  "real_cancellation": {
+    "status": "passed",
+    "recorded_at_utc": "2026-11-02T15:08:00.950049+00:00",
+    "candidate_sha256": "ab6cb95519b148d7131e370ad8467952a18153670cd7dfa6f7ed57c8fb14e0c5",
+    "manifest_sha256": "1177a5d85c57c56fe3b5d5b31280a12d0c1b420fe7674e0c4c24ae0eb788f0bc",
+    "observed_phase": "review_image",
+    "observed_after_seconds": 4.367,
+    "cleanup_seconds": 1.468,
+    "owned_process_group_gone": true,
+    "private_job_removed": true,
+    "shared_lock_released": true,
+    "gateway_slot_released": true,
+    "runtime_slot_released": true,
+    "elapsed_seconds": 5.846
+  },
+  "limits": [
+    "Pixel-space weighted conditioning is not learned identity blending. Identity fidelity, pose and morphology parity are unproven; unsupported controls reject before inference.",
+    "Synthetic drawings are not representative photo inputs.512px is suboptimal for SDXL; no 1024px quality/latency acceptance is claimed.",
+    "Actual vision review can make false-positive and unsupported observations. A model accepted verdict alone is not a human quality endorsement.",
+    "Enhancement, video and 3D learned-model entrypoints are blocked pending separately admitted eligible runtimes; deterministic utilities remain available.",
+    "Media is coordinator-local; distributed image-worker placement is not implemented in this slice.",
+    "The local application environment and persistent services were not activated or deployed. Owned acceptance services were stopped after testing."
+  ],
+  "verification": {
+    "go_format_vet_race_suite": "passed",
+    "tensor_free_runtime_tests": 13,
+    "profile_helper_regression_tests": 3,
+    "real_meld_workflow_tests": 1,
+    "real_meld_workflow_assertions": 39,
+    "real_meld_workflow_result": "passed",
+    "human_visual_quality_result": "failed",
+    "legacy_policy_tests": 104,
+    "legacy_policy_assertions": 1109,
+    "scoped_php_pint": "passed"
+  },
+  "source_sha256": {
+    "runtimes/meld/engine.py": "3f54be1cefad4ce3fe2bc28bcb7a53a2724291da3c6a8c58c6a050b53a533908",
+    "runtimes/meld/server.py": "59ac9459dbcd373d3dcb27e80dbe080387a6727230a9b259d69e66a338dc14aa",
+    "tests/test_meld_media_cancel.py": "0e38ba957bf4a96724dbf7ad3bc214e80f8587971c7eb1f095d3514c55082811"
+  },
+  "selected_artifact": {
+    "path": "docs/validation/meld-cpu-illustration-negative-512.png",
+    "sha256": "4cdc154106c62b809d912e522c70cf9f9311c27781b116ac4f2feed7f7561c94",
+    "size": "512x512",
+    "human_visual_quality_passed": false
+  }
+}

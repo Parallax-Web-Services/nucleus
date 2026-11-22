@@ -1,0 +1,15 @@
+# Install a CPU torch/torchvision wheel first; see docs/MELD_INFERENCE.md.
+# These are the dependency versions exercised by the local CPU runtime.
+torch==2.13.0
+torchvision==0.28.0
+diffusers==0.40.0
+transformers==5.16.1
+accelerate==1.14.0
+safetensors==0.8.0
+Pillow==12.3.0
+fastapi==0.141.1
+uvicorn==0.52.4
+python-multipart==0.0.32
+numpy==2.2.6
+compel==2.5.1
+pyparsing==3.3.3

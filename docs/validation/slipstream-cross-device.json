@@ -1,0 +1,49 @@
+{
+  "checks": [
+    "distinct remote OS identity and checksum-verified static deployment",
+    "bilateral enrollment, independent keys, shared fabric, signed identity inspection",
+    "distinct device telemetry and both authenticated map perspectives",
+    "disconnect removes capacity; reconnect restores it without rebuilding membership",
+    "revocation removes capacity and denies the still-running member"
+  ],
+  "distinct_os_installations_verified": true,
+  "fabric_id": "e6e73e8d688ae0781495a8e51654993cdaee88a84dfd8e7f2a64fb4511b37088",
+  "local_binary_sha256": "2a2af26679b30f2f10da849e294bc4108787d35add34fedb226721d867ecca2a",
+  "local_device": {
+    "architecture": "x86_64",
+    "boot_id_sha256": "314f8bc738a127c57ba4ddf73abb0551281425503ae329ad59536402d1a68fea",
+    "hostname": "OMEGA",
+    "machine_id_sha256": "b22e45f8c6d9b2744e1f052c7766b01c9ad76dfc29c5ccd49eb714e2b185cff0"
+  },
+  "member_node_id": "2a4af6b4bb9a4b652c6984e62a2aef93c5671a2ca1d9ea960c4b4969206fcc17",
+  "online_resources": [
+    {
+      "hostname": "slipstream",
+      "logical_cores": 8,
+      "memory_total_bytes": 16768643072,
+      "node_id": "bbc5a05c28c591593de026b307f77cfc529bb1a1e6c5e056d77cf9a76d014ba6"
+    },
+    {
+      "hostname": "OMEGA",
+      "logical_cores": 12,
+      "memory_total_bytes": 67377909760,
+      "node_id": "2a4af6b4bb9a4b652c6984e62a2aef93c5671a2ca1d9ea960c4b4969206fcc17"
+    }
+  ],
+  "owner_node_id": "bbc5a05c28c591593de026b307f77cfc529bb1a1e6c5e056d77cf9a76d014ba6",
+  "physical_hardware_verified": false,
+  "prototype_running": false,
+  "remote_binary_sha256": "2a2af26679b30f2f10da849e294bc4108787d35add34fedb226721d867ecca2a",
+  "remote_device": {
+    "architecture": "x86_64",
+    "boot_id_sha256": "d671ea182d5dc435b1a77694fb7679524ae2431e88d21c47b511eee9e21bcfe1",
+    "hostname": "slipstream",
+    "machine_id_sha256": "30e979caa3731a1d25a084e56c3dc73499bc26091ed3d71bad9450e439409946"
+  },
+  "schema_version": 1,
+  "ssh_target": "slipstream.host",
+  "state_preserved_for_recovery": false,
+  "status": "passed",
+  "transport": "mutual TLS 1.3 inside verified SSH loopback forwarding",
+  "verified_at_utc": "2026-11-01T18:23:43Z"
+}

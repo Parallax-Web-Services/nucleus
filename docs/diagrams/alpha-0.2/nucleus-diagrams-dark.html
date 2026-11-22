@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="Nucleus Alpha 0.2: fabric topology, private transport and secure pairing. Standalone dark architecture diagrams.">
+<title>Nucleus - Architecture diagrams</title>
+<style>
+:root { color-scheme: dark; --bg:#0C1317; --card:#131F24; --soft:#1B2B30; --fg:#E8F2EF; --muted:#AEC2BF; --line:#30454A; --accent:#62DDB3; --pale:#16392F; --blue:#9CCBF0; --blue-bg:#182F40; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; color:var(--fg); background:var(--bg); font:16px/1.5 "Segoe UI",Arial,sans-serif; }
+button { font:inherit; color:inherit; cursor:pointer; }
+button:focus-visible,a:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.page { max-width:1664px; margin:0 auto; padding:24px 32px 32px; }
+.toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; padding:0 0 20px; border-bottom:1px solid var(--line); }
+.tabs { display:flex; gap:6px; flex-wrap:wrap; }
+.tab,.action { background:transparent; border:1px solid transparent; border-radius:9px; padding:10px 16px; }
+.tab { color:var(--muted); display:flex; align-items:center; gap:10px; }
+.tab .ordinal { font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.tab[aria-selected="true"] { background:var(--soft); color:var(--fg); border-color:var(--line); }
+.tab[aria-selected="true"] .ordinal { color:var(--accent); }
+.tab:hover,.action:hover { background:var(--soft); }
+.actions { display:flex; gap:8px; }
+.action { border-color:var(--line); padding:9px 14px; font-size:14px; }
+.action.primary { color:var(--accent); border-color:var(--pale); background:var(--pale); }
+.diagram-panel { scroll-margin-top:20px; }
+.desktop-diagram>svg { display:block; width:100%; height:auto; }
+.mobile-diagram { display:none; }
+.page-footer { margin-top:12px; color:var(--muted); font-size:13px; text-align:center; }
+.print-only { display:none; }
+@media (max-width:1100px) {
+ .page { padding:16px 18px 24px; }
+ .toolbar { gap:12px; padding-bottom:16px; }
+ .tabs { width:100%; gap:4px; }
+ .tab { flex:1; justify-content:center; padding:10px 9px; gap:7px; font-size:14px; }
+ .actions { width:100%; justify-content:flex-end; }
+ .action { min-height:44px; }
+ .desktop-diagram { display:none; }
+ .mobile-diagram { display:block; padding-top:30px; max-width:680px; margin:0 auto; }
+ .mobile-heading { margin-bottom:28px; }
+ .eyebrow { color:var(--accent); font-size:12px; text-transform:uppercase; letter-spacing:.1em; }
+ h1 { font-size:clamp(30px,7.7vw,42px); line-height:1.14; letter-spacing:-.035em; margin:10px 0 12px; }
+ p { margin:8px 0 0; color:var(--muted); overflow-wrap:anywhere; }
+ h2 { font-size:17px; margin:18px 0 0; line-height:1.35; }
+ .node { padding:20px; border-radius:14px; border:1px solid var(--line); background:var(--card); }
+ .node>strong { display:block; font-size:23px; line-height:1.3; overflow-wrap:anywhere; }
+ .node-role { display:block; margin:0 0 9px; color:var(--accent); font-size:11px; font-weight:600; letter-spacing:.07em; }
+ .browser { background:var(--blue-bg); border-color:transparent; }
+ .browser .node-role { color:var(--blue); }
+ .members { display:grid; gap:10px; grid-template-columns:minmax(0,1fr); }
+ .members .node { padding:16px; }
+ .members .node>strong { font-size:20px; }
+ .members p { font-size:13px; }
+ .connector { display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--accent); font-size:14px; padding:15px 0; text-align:center; }
+ .connector span { font-size:25px; line-height:1; }
+ .connector small { color:var(--muted); font-size:12px; }
+ .connector.local { color:var(--blue); }
+ hr { border:0; border-top:1px solid var(--line); margin:18px 0; }
+ .note { margin-top:16px; border-radius:9px; background:var(--pale); color:var(--accent); padding:12px 14px; font-size:14px; line-height:1.5; }
+ .secure { text-align:center; margin:0 0 18px; }
+ .scope { margin:20px 0; font-size:14px; line-height:1.6; }
+ .scope strong { color:var(--fg); font-weight:600; }
+ .participants { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+ .participants .node { padding:16px; }
+ .participants strong { font-size:20px; }
+ .participants p { font-size:13px; }
+ .steps { list-style:none; margin:24px 0; padding:0; }
+ .steps li { display:grid; grid-template-columns:34px minmax(0,1fr); gap:14px; padding:0 0 28px; }
+ .steps li:last-child { padding-bottom:0; }
+ .step-num { color:var(--accent); font-size:13px; padding-top:3px; border-right:1px solid var(--line); }
+ .steps h2 { margin:6px 0 0; font-size:19px; }
+ .steps p { font-size:14px; }
+ .steps .note { margin-top:12px; }
+ .direction { font-size:12px; color:var(--muted); }
+ .mobile-diagram footer { padding:24px 0 8px; border-top:1px solid var(--line); color:var(--muted); font-size:11px; letter-spacing:.04em; line-height:1.8; }
+ .page-footer { text-align:left; font-size:12px; }
+}
+@media print {
+ @page { size: 16in 9in; margin:0; }
+ html,body { margin:0!important; background:var(--bg)!important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+ .page { max-width:none; width:16in; padding:0; }
+ .toolbar,.page-footer,.mobile-diagram { display:none!important; }
+ .diagram-panel,.diagram-panel[hidden] { display:block!important; width:16in; height:9in; break-after:page; page-break-after:always; }
+ .diagram-panel:last-of-type { break-after:auto; page-break-after:auto; }
+ .desktop-diagram { display:block!important; }
+ .desktop-diagram>svg { width:16in!important; height:9in!important; }
+}
+@media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; } }
+html.js .diagram-panel[hidden] { display:none; }
+</style>
+</head>
+<body>
+<div class="page">
+<header class="toolbar">
+<nav class="tabs" role="tablist" aria-label="Architecture diagrams">
+<button class="tab" type="button" id="tab-fabric" role="tab" aria-controls="fabric" aria-selected="true"><span class="ordinal">01</span>Fabric</button>
+<button class="tab" type="button" id="tab-transport" role="tab" aria-controls="transport" aria-selected="false"><span class="ordinal">02</span>Transport</button>
+<button class="tab" type="button" id="tab-pairing" role="tab" aria-controls="pairing" aria-selected="false"><span class="ordinal">03</span>Pairing</button>
+</nav>
+<div class="actions">
+<button class="action primary" id="download" type="button">Download SVG</button>
+<button class="action" id="print" type="button">Print all</button>
+</div>
+</header>
+<main>
+<section class="diagram-panel" id="fabric" role="tabpanel" aria-labelledby="tab-fabric" data-filename="01-logical-topology-dark.svg">
+<div class="desktop-diagram"><svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="fabric-title fabric-desc">
+<title id="fabric-title">One trusted fabric.</title><desc id="fabric-desc">Four members (OMEGA, Alpha, Iota, and Tarragon) use mutual TLS 1.3 with the Slipstream fabric owner. The owner&#x27;s single runtime contains membership authority, local inventory, and Positronic&#x27;s aggregated telemetry. A browser on OMEGA reads only OMEGA&#x27;s loopback API with a separate browser token.</desc>
+<rect x="0" y="0" width="1600" height="900" rx="0" fill="#0C1317" stroke="none" stroke-width="1"/>
+<text x="72" y="73" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600" text-anchor="start">nucleus</text>
+<circle cx="174" cy="69" r="4" fill="#62DDB3" stroke="none" stroke-width="1"/>
+<text x="1528" y="69" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="end">ALPHA 0.2  /  LOGICAL TOPOLOGY</text>
+<text x="72" y="145" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="51" font-weight="600" text-anchor="start">One trusted fabric.</text>
+<text x="72" y="189" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400" text-anchor="start">A shared view of your machines.</text>
+<line x1="72" y1="214" x2="1528" y2="214" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<line x1="72" y1="808" x2="1528" y2="808" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<text x="72" y="847" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">IDENTITY, MEMBERSHIP &amp; TELEMETRY</text>
+<text x="72" y="877" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start">Implemented prototype  /  November 01, 2026</text>
+<text x="1528" y="859" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end">01 / 03</text>
+<rect x="72" y="242" width="416" height="100" rx="16" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="92" y="270" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="102" y="280" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="114" y1="299" x2="114" y2="304" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="107" y1="304" x2="121" y2="304" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="153" y="285" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">OMEGA</text>
+<text x="153" y="315" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">WSL / local member</text>
+<rect x="72" y="382" width="416" height="100" rx="16" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="92" y="410" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="102" y="420" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="114" y1="439" x2="114" y2="444" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="107" y1="444" x2="121" y2="444" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="153" y="425" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">Alpha</text>
+<text x="153" y="455" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">alpha.wphyperdrive.com</text>
+<rect x="72" y="510" width="416" height="100" rx="16" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="92" y="538" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="102" y="548" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="114" y1="567" x2="114" y2="572" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="107" y1="572" x2="121" y2="572" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="153" y="553" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">Iota</text>
+<text x="153" y="583" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">iota.parallaxws.com</text>
+<rect x="72" y="638" width="416" height="100" rx="16" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="92" y="666" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="102" y="676" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="114" y1="695" x2="114" y2="700" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="107" y1="700" x2="121" y2="700" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="153" y="681" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">Tarragon</text>
+<text x="153" y="711" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">tarragon.app</text>
+<line x1="503" y1="276" x2="749" y2="276" stroke="#9CCBF0" stroke-width="2.2" stroke-linecap="round"/>
+<polygon points="749,276 738.0,271.0 738.0,281.0" fill="#9CCBF0"/>
+<polygon points="503,276 514.0,281.0 514.0,271.0" fill="#9CCBF0"/>
+<text x="626" y="260" fill="#9CCBF0" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="middle">Local read-only API</text>
+<text x="626" y="308" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" text-anchor="middle">Browser bearer token</text>
+<rect x="764" y="242" width="764" height="120" rx="16" fill="#182F40" stroke="none" stroke-width="1"/>
+<rect x="790" y="268" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="800" y="279" width="24" height="21" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="800" y1="285" x2="824" y2="285" stroke="#62DDB3" stroke-width="1.5" stroke-linecap="round"/>
+<circle cx="804" cy="282" r="1" fill="#62DDB3" stroke="none" stroke-width="1"/>
+<text x="855" y="286" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">Local browser view / OMEGA</text>
+<text x="855" y="321" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="start">The map reads its own node&#x27;s loopback API.</text>
+<path d="M 503 324 C 606 324 645 473 749 473" fill="none" stroke="#62DDB3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="749,473 738.0,468.0 738.0,478.0" fill="#62DDB3"/>
+<polygon points="503,324 514.0,329.0 514.0,319.0" fill="#62DDB3"/>
+<path d="M 503 432 C 606 432 645 535 749 535" fill="none" stroke="#62DDB3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="749,535 738.0,530.0 738.0,540.0" fill="#62DDB3"/>
+<polygon points="503,432 514.0,437.0 514.0,427.0" fill="#62DDB3"/>
+<path d="M 503 560 C 606 560 645 597 749 597" fill="none" stroke="#62DDB3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="749,597 738.0,592.0 738.0,602.0" fill="#62DDB3"/>
+<polygon points="503,560 514.0,565.0 514.0,555.0" fill="#62DDB3"/>
+<path d="M 503 688 C 606 688 645 659 749 659" fill="none" stroke="#62DDB3" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="749,659 738.0,654.0 738.0,664.0" fill="#62DDB3"/>
+<polygon points="503,688 514.0,693.0 514.0,683.0" fill="#62DDB3"/>
+<rect x="764" y="423" width="764" height="315" rx="20" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<text x="764" y="400" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="600" text-anchor="start">MUTUAL TLS 1.3  /  TELEMETRY + FABRIC VIEW</text>
+<rect x="790" y="447" width="148" height="28" rx="8" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="864" y="467" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" text-anchor="middle">FABRIC OWNER</text>
+<text x="790" y="512" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="35" font-weight="600" text-anchor="start">Slipstream</text>
+<text x="1498" y="510" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="end">slipstream.host</text>
+<line x1="790" y1="535" x2="1502" y2="535" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<text x="790" y="575" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" text-anchor="start">Membership authority</text>
+<text x="790" y="609" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="400" text-anchor="start">Fabric CA + approved nodes</text>
+<text x="790" y="640" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Separate CA and node keys</text>
+<line x1="1142" y1="560" x2="1142" y2="656" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<text x="1170" y="575" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" text-anchor="start">Positronic</text>
+<text x="1170" y="609" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="400" text-anchor="start">Heartbeats + shared view</text>
+<text x="1170" y="640" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Includes owner inventory</text>
+<rect x="790" y="684" width="712" height="34" rx="8" fill="#1B2B30" stroke="none" stroke-width="1"/>
+<text x="1146" y="707" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">One Nucleus runtime on this host</text>
+<text x="72" y="780" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="start">One runtime per node. The fabric shares membership, health and resource inventory.</text>
+</svg>
+</div>
+<div class="mobile-diagram">
+<div class="mobile-heading"><span class="eyebrow">Logical topology</span><h1>One trusted fabric.</h1><p>A shared view of your machines.</p></div>
+<div class="node browser"><span class="node-role">LOCAL BROWSER VIEW / OMEGA</span><strong>Resource map</strong><p>Reads OMEGA's loopback API using a separate browser bearer token.</p></div>
+<div class="connector local">Local read-only API<span aria-hidden="true">↕</span></div>
+<div class="members">
+  <div class="node"><strong>OMEGA</strong><p>WSL / local member</p></div>
+  <div class="node"><strong>Alpha</strong><p>alpha.wphyperdrive.com</p></div>
+  <div class="node"><strong>Iota</strong><p>iota.parallaxws.com</p></div>
+  <div class="node"><strong>Tarragon</strong><p>tarragon.app</p></div>
+</div>
+<div class="connector">Mutual TLS 1.3<span aria-hidden="true">↕</span><small>Telemetry + fabric view</small></div>
+<div class="node owner"><span class="node-role">FABRIC OWNER</span><strong>Slipstream</strong><p>slipstream.host</p><hr><h2>Membership authority</h2><p>Fabric CA + approved nodes. Separate CA and node keys.</p><h2>Positronic</h2><p>Heartbeats + shared view, including the owner's inventory.</p><div class="note">One Nucleus runtime on this host</div></div>
+<p class="scope">One runtime per node. The fabric shares membership, health and resource inventory.</p>
+<footer>ALPHA 0.2 / IMPLEMENTED PROTOTYPE<br>November 01, 2026</footer></div>
+</section>
+<section class="diagram-panel" id="transport" role="tabpanel" aria-labelledby="tab-transport" data-filename="02-private-transport-dark.svg">
+<div class="desktop-diagram"><svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="transport-title transport-desc">
+<title id="transport-title">Private reachability.</title><desc id="transport-desc">Alpha, Iota, and Tarragon reach Slipstream using a reverse SSH forward into OMEGA, then a local SSH forward to Slipstream&#x27;s loopback coordinator. OMEGA initiates both SSH connections. Nucleus mutual TLS remains end-to-end between member and owner, and no public Nucleus listener is exposed.</desc>
+<rect x="0" y="0" width="1600" height="900" rx="0" fill="#0C1317" stroke="none" stroke-width="1"/>
+<text x="72" y="73" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600" text-anchor="start">nucleus</text>
+<circle cx="174" cy="69" r="4" fill="#62DDB3" stroke="none" stroke-width="1"/>
+<text x="1528" y="69" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="end">ALPHA 0.2  /  PROTOTYPE TRANSPORT</text>
+<text x="72" y="145" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="51" font-weight="600" text-anchor="start">Private reachability.</text>
+<text x="72" y="189" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400" text-anchor="start">End-to-end node identity.</text>
+<line x1="72" y1="214" x2="1528" y2="214" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<line x1="72" y1="808" x2="1528" y2="808" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<text x="72" y="847" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">IDENTITY, MEMBERSHIP &amp; TELEMETRY</text>
+<text x="72" y="877" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start">Implemented prototype  /  November 01, 2026</text>
+<text x="1528" y="859" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end">02 / 03</text>
+<path d="M 274 346 L 274 300 C 274 282 280 276 298 276 L 1302 276 C 1320 276 1326 282 1326 300 L 1326 346" fill="none" stroke="#62DDB3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="274" cy="346" r="5" fill="#62DDB3" stroke="none" stroke-width="1"/>
+<circle cx="1326" cy="346" r="5" fill="#62DDB3" stroke="none" stroke-width="1"/>
+<rect x="533" y="249" width="534" height="52" rx="26" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="800" y="282" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="600" text-anchor="middle">END-TO-END NUCLEUS mTLS 1.3</text>
+<text x="800" y="328" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="middle">The forwarding bridge does not terminate this session.</text>
+<rect x="72" y="365" width="404" height="316" rx="18" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="98" y="390" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="108" y="400" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="120" y1="419" x2="120" y2="424" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="113" y1="424" x2="127" y2="424" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="98" y="475" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600" text-anchor="start">Remote members</text>
+<text x="98" y="507" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="start">Alpha / Iota / Tarragon</text>
+<rect x="98" y="543" width="352" height="109" rx="12" fill="#1B2B30" stroke="none" stroke-width="1"/>
+<text x="118" y="578" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">Nucleus member</text>
+<text x="118" y="613" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Loopback tunnel endpoint</text>
+<rect x="598" y="365" width="404" height="316" rx="18" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="624" y="390" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="634" y="400" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="646" y1="419" x2="646" y2="424" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="639" y1="424" x2="653" y2="424" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="624" y="475" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600" text-anchor="start">OMEGA</text>
+<text x="624" y="507" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="start">Local forwarding bridge</text>
+<rect x="624" y="543" width="352" height="109" rx="12" fill="#1B2B30" stroke="none" stroke-width="1"/>
+<text x="644" y="578" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">OpenSSH client</text>
+<text x="644" y="613" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Loopback forwarding path</text>
+<rect x="1124" y="365" width="404" height="316" rx="18" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<rect x="1150" y="390" width="44" height="44" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<rect x="1160" y="400" width="24" height="18" rx="3" fill="none" stroke="#62DDB3" stroke-width="1.7"/>
+<line x1="1172" y1="419" x2="1172" y2="424" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<line x1="1165" y1="424" x2="1179" y2="424" stroke="#62DDB3" stroke-width="1.7" stroke-linecap="round"/>
+<text x="1150" y="475" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="29" font-weight="600" text-anchor="start">Slipstream</text>
+<text x="1150" y="507" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="start">Fabric owner</text>
+<rect x="1150" y="543" width="352" height="109" rx="12" fill="#1B2B30" stroke="none" stroke-width="1"/>
+<text x="1170" y="578" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" text-anchor="start">Nucleus owner</text>
+<text x="1170" y="613" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Loopback coordinator + API</text>
+<line x1="488" y1="590" x2="586" y2="590" stroke="#62DDB3" stroke-width="2.7" stroke-linecap="round"/>
+<polygon points="586,590 575.0,585.0 575.0,595.0" fill="#62DDB3"/>
+<text x="537" y="556" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle">SSH -R</text>
+<line x1="1014" y1="590" x2="1112" y2="590" stroke="#62DDB3" stroke-width="2.7" stroke-linecap="round"/>
+<polygon points="1112,590 1101.0,585.0 1101.0,595.0" fill="#62DDB3"/>
+<text x="1063" y="556" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="600" text-anchor="middle">SSH -L</text>
+<text x="72" y="733" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="600" text-anchor="start">OMEGA initiates both SSH connections.</text>
+<text x="72" y="766" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" text-anchor="start">Arrows show telemetry traffic; the fabric view returns over the same path.</text>
+<rect x="1130" y="713" width="398" height="66" rx="12" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="1329" y="753" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600" text-anchor="middle">No public Nucleus listener.</text>
+</svg>
+</div>
+<div class="mobile-diagram">
+<div class="mobile-heading"><span class="eyebrow">Prototype transport</span><h1>Private reachability.</h1><p>End-to-end node identity.</p></div>
+<div class="note secure">End-to-end Nucleus mTLS 1.3<br><small>Remote member ↔ Slipstream</small></div>
+<div class="node"><span class="node-role">REMOTE MEMBERS</span><strong>Alpha / Iota / Tarragon</strong><h2>Nucleus member</h2><p>Loopback tunnel endpoint</p></div>
+<div class="connector">SSH -R<span aria-hidden="true">↓</span></div>
+<div class="node"><strong>OMEGA</strong><p>Local forwarding bridge</p><h2>OpenSSH client</h2><p>Forwards the inner TLS session without terminating it.</p></div>
+<div class="connector">SSH -L<span aria-hidden="true">↓</span></div>
+<div class="node owner"><span class="node-role">FABRIC OWNER</span><strong>Slipstream</strong><h2>Nucleus owner</h2><p>Loopback coordinator + API</p></div>
+<p class="scope"><strong>OMEGA initiates both SSH connections.</strong><br>Arrows show telemetry traffic; the fabric view returns over the same path.</p>
+<div class="note secure">No public Nucleus listener.</div>
+<footer>ALPHA 0.2 / IMPLEMENTED PROTOTYPE<br>November 01, 2026</footer></div>
+</section>
+<section class="diagram-panel" id="pairing" role="tabpanel" aria-labelledby="tab-pairing" data-filename="03-secure-pairing-dark.svg">
+<div class="desktop-diagram"><svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="pairing-title pairing-desc">
+<title id="pairing-title">Explicit pairing.</title><desc id="pairing-desc">The owner sends a signed expiring one-use invitation. The joining node accepts it and returns a signed certificate request. The owner inspects and approves, then issues a signed grant and membership certificate. The joining node verifies and accepts membership before mutual TLS telemetry begins. Private keys remain on their originating machines.</desc>
+<rect x="0" y="0" width="1600" height="900" rx="0" fill="#0C1317" stroke="none" stroke-width="1"/>
+<text x="72" y="73" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600" text-anchor="start">nucleus</text>
+<circle cx="174" cy="69" r="4" fill="#62DDB3" stroke="none" stroke-width="1"/>
+<text x="1528" y="69" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="end">ALPHA 0.2  /  SECURE ENROLLMENT</text>
+<text x="72" y="145" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="51" font-weight="600" text-anchor="start">Explicit pairing.</text>
+<text x="72" y="189" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="400" text-anchor="start">Verified at both ends.</text>
+<line x1="72" y1="214" x2="1528" y2="214" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<line x1="72" y1="808" x2="1528" y2="808" stroke="#30454A" stroke-width="2" stroke-linecap="round"/>
+<text x="72" y="847" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="start">IDENTITY, MEMBERSHIP &amp; TELEMETRY</text>
+<text x="72" y="877" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" text-anchor="start">Implemented prototype  /  November 01, 2026</text>
+<text x="1528" y="859" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end">03 / 03</text>
+<rect x="72" y="242" width="414" height="96" rx="16" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<text x="98" y="281" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">Slipstream / fabric owner</text>
+<text x="98" y="313" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Node key + separate fabric CA key</text>
+<rect x="1114" y="242" width="414" height="96" rx="16" fill="#131F24" stroke="#30454A" stroke-width="1"/>
+<text x="1140" y="281" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" text-anchor="start">Joining node</text>
+<text x="1140" y="313" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="start">Own persistent identity key</text>
+<line x1="279" y1="340" x2="279" y2="755" stroke="#30454A" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 8"/>
+<line x1="1321" y1="340" x2="1321" y2="755" stroke="#30454A" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 8"/>
+<text x="800" y="269" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="600" text-anchor="middle">TRUSTED OUT-OF-BAND EXCHANGE</text>
+<text x="800" y="302" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="400" text-anchor="middle">Signed documents travel through an existing trusted channel.</text>
+<text x="800" y="381" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" text-anchor="middle">01   Signed invitation</text>
+<line x1="279" y1="401" x2="1321" y2="401" stroke="#62DDB3" stroke-width="2.5" stroke-linecap="round"/>
+<polygon points="1321,401 1310.0,396.0 1310.0,406.0" fill="#62DDB3"/>
+<text x="800" y="430" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="middle">Pinned authority + expiring, one-use secret</text>
+<rect x="1183" y="423" width="276" height="37" rx="10" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="1321.0" y="448" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">Accept invitation</text>
+<text x="800" y="493" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" text-anchor="middle">02   Signed certificate request</text>
+<line x1="1321" y1="513" x2="279" y2="513" stroke="#62DDB3" stroke-width="2.5" stroke-linecap="round"/>
+<polygon points="279,513 290.0,518.0 290.0,508.0" fill="#62DDB3"/>
+<text x="800" y="542" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="middle">Joining node proves possession of its key</text>
+<rect x="141" y="535" width="276" height="37" rx="10" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="279.0" y="560" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">Owner inspects + approves</text>
+<text x="800" y="605" fill="#E8F2EF" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" text-anchor="middle">03   Signed grant + membership certificate</text>
+<line x1="279" y1="625" x2="1321" y2="625" stroke="#62DDB3" stroke-width="2.5" stroke-linecap="round"/>
+<polygon points="1321,625 1310.0,620.0 1310.0,630.0" fill="#62DDB3"/>
+<text x="800" y="654" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" text-anchor="middle">Bound to the pending request and joining node</text>
+<rect x="1167" y="647" width="308" height="37" rx="10" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="1321.0" y="672" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="17" font-weight="600" text-anchor="middle">Verify + accept membership</text>
+<rect x="279" y="706" width="1042" height="49" rx="13" fill="#16392F" stroke="none" stroke-width="1"/>
+<text x="800" y="738" fill="#62DDB3" font-family="Segoe UI, Arial, sans-serif" font-size="23" font-weight="600" text-anchor="middle">04   Mutual TLS telemetry begins</text>
+<text x="800" y="784" fill="#AEC2BF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="400" text-anchor="middle">Private keys stay on their originating nodes. Certificates establish membership.</text>
+</svg>
+</div>
+<div class="mobile-diagram">
+<div class="mobile-heading"><span class="eyebrow">Secure enrollment</span><h1>Explicit pairing.</h1><p>Verified at both ends.</p></div>
+<div class="participants"><div class="node"><span class="node-role">OWNER</span><strong>Slipstream</strong><p>Node key + separate fabric CA key</p></div><div class="node"><span class="node-role">JOINING NODE</span><strong>New member</strong><p>Own persistent identity key</p></div></div>
+<p class="scope">Signed documents travel through an existing trusted out-of-band channel.</p>
+<ol class="steps">
+<li><span class="step-num">01</span><div><span class="direction">Owner → joining node</span><h2>Signed invitation</h2><p>Pinned authority + expiring, one-use secret.</p><div class="note">Joining node accepts invitation</div></div></li>
+<li><span class="step-num">02</span><div><span class="direction">Joining node → owner</span><h2>Signed certificate request</h2><p>Proves possession of the joining node's key.</p><div class="note">Owner inspects + approves</div></div></li>
+<li><span class="step-num">03</span><div><span class="direction">Owner → joining node</span><h2>Signed grant + membership certificate</h2><p>Bound to the pending request and joining node.</p><div class="note">Joining node verifies + accepts membership</div></div></li>
+<li><span class="step-num">04</span><div><h2>Mutual TLS telemetry begins</h2><p>Both endpoints prove their identity.</p></div></li>
+</ol>
+<p class="scope">Private keys stay on their originating nodes. Certificates establish membership.</p>
+<footer>ALPHA 0.2 / IMPLEMENTED PROTOTYPE<br>November 01, 2026</footer></div>
+</section>
+</main>
+<div class="page-footer">Nucleus Alpha 0.2 / Architecture collection</div>
+<noscript><style>.toolbar{display:none}</style><p>All three diagrams are shown below.</p></noscript>
+</div>
+<script>
+(() => {
+ 'use strict';
+ document.documentElement.classList.add('js');
+ const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+ const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+ let active = 0;
+ function select(index, focus) {
+   active = index;
+   tabs.forEach((tab,i) => {
+     tab.setAttribute('aria-selected',String(i===index));
+     tab.tabIndex = i===index ? 0 : -1;
+     panels[i].hidden = i!==index;
+   });
+   if (focus) tabs[index].focus();
+   history.replaceState(null,'','#'+panels[index].id);
+ }
+ tabs.forEach((tab,i) => {
+   tab.addEventListener('click',()=>select(i,false));
+   tab.addEventListener('keydown',e=>{
+     let next;
+     if(e.key==='ArrowRight') next=(i+1)%tabs.length;
+     else if(e.key==='ArrowLeft') next=(i+tabs.length-1)%tabs.length;
+     else if(e.key==='Home') next=0;
+     else if(e.key==='End') next=tabs.length-1;
+     else return;
+     e.preventDefault(); select(next,true);
+   });
+ });
+ const chosen = panels.findIndex(p=>'#'+p.id===location.hash);
+ select(chosen<0 ? 0 : chosen,false);
+ window.addEventListener('hashchange',()=>{
+   const i=panels.findIndex(p=>'#'+p.id===location.hash);
+   if(i>=0) select(i,false);
+ });
+ document.getElementById('download').addEventListener('click',()=>{
+   const panel=panels[active];
+   const clone=panel.querySelector('svg').cloneNode(true);
+   const data='<?xml version="1.0" encoding="utf-8"?>\n'+new XMLSerializer().serializeToString(clone);
+   const url=URL.createObjectURL(new Blob([data],{type:'image/svg+xml;charset=utf-8'}));
+   const link=document.createElement('a');
+   link.href=url; link.download=panel.dataset.filename;
+   document.body.append(link); link.click(); link.remove();
+   window.setTimeout(()=>URL.revokeObjectURL(url),30000);
+ });
+ document.getElementById('print').addEventListener('click',()=>window.print());
+})();
+</script>
+</body>
+</html>

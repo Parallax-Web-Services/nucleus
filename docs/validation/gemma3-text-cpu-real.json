@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-11-02T16:53:44.596747+00:00",
+  "scope": "two normal coordinator-local CPU requests; cold SSE then warm JSON; not hosted-network or remote-worker proof",
+  "real_model_inference": true,
+  "request_limit": 2,
+  "generation_requests_sent": 2,
+  "status": "passed",
+  "model": {
+    "id": "gemma-3-4b-it-q4-k-m-text",
+    "revision": "d0976223747697cb51e056d85c532013931fe52e",
+    "source": "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/d0976223747697cb51e056d85c532013931fe52e/gemma-3-4b-it-Q4_K_M.gguf",
+    "license": "gemma",
+    "architecture": "gemma3",
+    "format": "GGUF",
+    "quantization": "Q4_K_M",
+    "sha256": "882e8d2db44dc554fb0ea5077cb7e4bc49e7342a1f0da57901c0802ea21a0863",
+    "size_bytes": 2489757856,
+    "required_memory_bytes": 8589934592,
+    "workloads": [
+      "text-generation"
+    ],
+    "runtime": "llama.cpp"
+  },
+  "provenance": {
+    "publisher": "Google",
+    "country": "US",
+    "evidence": [
+      "https://huggingface.co/google/gemma-3-4b-it",
+      "https://ai.google.dev/gemma/docs/core/model_card_3",
+      "https://ai.google.dev/gemma/terms"
+    ],
+    "lineage_complete": false,
+    "lineage_disclosure": "publisher-disclosed"
+  },
+  "declared_ancestors": [
+    {
+      "id": "google/gemma-3-4b-it",
+      "revision": "Gemma 3 4B IT March 2025 release",
+      "publisher": "Google",
+      "country": "US",
+      "source": "https://huggingface.co/google/gemma-3-4b-it",
+      "evidence": [
+        "https://huggingface.co/google/gemma-3-4b-it",
+        "https://arxiv.org/html/2503.19786v1"
+      ]
+    },
+    {
+      "id": "Google Gemma 3 SigLIP vision encoder",
+      "revision": "Gemma 3 4B IT March 2025 release",
+      "publisher": "Google",
+      "country": "US",
+      "source": "https://huggingface.co/google/gemma-3-4b-it",
+      "evidence": [
+        "https://arxiv.org/html/2503.19786v1",
+        "https://ai.google.dev/gemma/docs/core/model_card_3"
+      ]
+    }
+  ],
+  "publisher_disclosed_lineage_exception": true,
+  "unknown_internal_teacher_checkpoint_identities_remain_undisclosed": true,
+  "policy_scope": "models_and_model_derivatives; known denied origins/identities/hashes still denied",
+  "configured_limits": {
+    "threads": 2,
+    "context_length": 1024,
+    "max_tokens": 64,
+    "memory_limit_bytes": 8589934592,
+    "reserve_memory_bytes": 1073741824,
+    "startup_timeout_seconds": 180
+  },
+  "request_max_tokens": 32,
+  "requests": [
+    {
+      "case": "cold-streaming",
+      "stream": true,
+      "prompt": "In one short sentence, explain why a private local AI server can be useful.",
+      "max_tokens": 32,
+      "temperature": 0,
+      "http_status": 200,
+      "response_headers_ms": 1.107,
+      "job_id": "19bfc1d4d230131ca798700ec5ae8217",
+      "sse_data_events": 29,
+      "sse_done": true,
+      "client_first_content_ms": 6817.863,
+      "client_elapsed_ms": 9677.392,
+      "text": "A private local AI server offers enhanced privacy, security, and control over your data and AI models compared to cloud-based solutions.",
+      "finish_reasons": [
+        "stop"
+      ],
+      "usage": {
+        "completion_tokens": 27,
+        "prompt_tokens": 25,
+        "total_tokens": 52,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "job_status": "completed",
+      "placement_owner_local": true,
+      "metrics": {
+        "prompt_tokens": 25,
+        "generation_tokens": 27,
+        "prompt_ms": 1333.859,
+        "generation_ms": 2859.681,
+        "prompt_tokens_per_second": 18.742610725721384,
+        "generation_tokens_per_second": 9.441612543496984,
+        "cold_start_ms": 5282.459705,
+        "elapsed_ms": 9479.129044,
+        "peak_rss_bytes": 4238430208,
+        "runtime_version": "version: 0.8.0-dev (build 12032, commit dde879bc4)\nbuilt with GNU 11.4.0 for Linux x86_64",
+        "threads": 2,
+        "context_length": 1024,
+        "max_tokens": 32
+      }
+    },
+    {
+      "case": "warm-json",
+      "stream": false,
+      "prompt": "Reply with one short sentence: what is two plus two?",
+      "max_tokens": 32,
+      "temperature": 0,
+      "http_status": 200,
+      "response_headers_ms": 1868.698,
+      "job_id": "b3ad5a477b99b981bf91682fe4c60a09",
+      "client_first_content_ms": null,
+      "first_content_note": "JSON response is buffered; model time-to-first-token is not exposed by this transport",
+      "client_elapsed_ms": 1868.86,
+      "text": "Two plus two equals four.",
+      "finish_reasons": [
+        "stop"
+      ],
+      "usage": {
+        "completion_tokens": 7,
+        "prompt_tokens": 21,
+        "total_tokens": 28,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "job_status": "completed",
+      "placement_owner_local": true,
+      "metrics": {
+        "prompt_tokens": 21,
+        "generation_tokens": 7,
+        "prompt_ms": 867.943,
+        "generation_ms": 879.472,
+        "prompt_tokens_per_second": 24.195137238274864,
+        "generation_tokens_per_second": 7.959321047173759,
+        "cold_start_ms": 0,
+        "elapsed_ms": 1749.976155,
+        "peak_rss_bytes": 4238499840,
+        "runtime_version": "version: 0.8.0-dev (build 12032, commit dde879bc4)\nbuilt with GNU 11.4.0 for Linux x86_64",
+        "threads": 2,
+        "context_length": 1024,
+        "max_tokens": 32
+      }
+    }
+  ],
+  "owned_cleanup": {
+    "owner_exit_code": 0,
+    "graceful_pid_termination": true,
+    "all_observed_owned_processes_gone": true,
+    "isolated_session_gone": true
+  },
+  "isolated_owner_node_id": "10a61fa59c5a3524c4c3869e28906ec769203135b5beaf833a80c93dd960cee1",
+  "observed_runtime": {
+    "flags": {
+      "--threads": "2",
+      "--threads-batch": "2",
+      "--threads-http": "2",
+      "--ctx-size": "1024",
+      "--n-predict": "64",
+      "--parallel": "1",
+      "--n-gpu-layers": "0",
+      "--device": "none",
+      "--host": "127.0.0.1",
+      "--no-op-offload": true,
+      "--no-kv-offload": true,
+      "--cache-ram": "0",
+      "--ctx-checkpoints": "0",
+      "--no-context-shift": true,
+      "--no-warmup": true,
+      "--no-webui": true,
+      "--no-slots": true,
+      "--perf": true
+    },
+    "model_path_matches_approved_local_file": true,
+    "hard_address_space_bytes": 8589934592
+  },
+  "external_sampling": {
+    "peak_owner_tree_rss_bytes": 4255039488,
+    "peak_runtime_rss_bytes": 4238499840,
+    "interval_ms": 50,
+    "note": "sampled sums can count shared pages; not physical RAM or exact high-water marks"
+  }
+}

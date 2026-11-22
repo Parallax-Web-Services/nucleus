@@ -1,0 +1,16 @@
+[
+  {
+    "id": "parallax_nebula",
+    "key": "parallax_nebula",
+    "name": "NEBULA",
+    "description": "Open the NEBULA panel",
+    "type": "link",
+    "group_id": "software",
+    "order": 9500,
+    "uri": "parallax-nebula/index.live.php",
+    "icon": "parallax_nebula.svg",
+    "target": "_self",
+    "featuremanager": 1,
+    "feature": "parallax_nebula"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "project_id": "appgprj_6ae7ce87119081918ccf4d4889a14ff0",
+  "version_id": "appgprj_6ae7ce87119081918ccf4d4889a14ff0~appgver_aafbde593a508191b549a8ee08664301",
+  "deployment_id": "appgdep_6ae7ced4c3b08191a297967ef942b0e0",
+  "source_commit_sha": "368e5d5ce0096b27957a5184f1ff9cc7ada1ecf4",
+  "url": "https://nucleus-alpha-02-architecture.seanpatricktalbot.chatgpt.site",
+  "access_mode": "public",
+  "status": "succeeded",
+  "published_at": "2026-11-01T23:44:27.329253+00:00"
+}

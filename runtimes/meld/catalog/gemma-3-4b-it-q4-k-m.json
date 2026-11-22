@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "runtime_version": "nucleus-meld/1",
+  "backend": "llama_cpp_vlm",
+  "workload": "image-review",
+  "model": "gemma-3-4b-it-q4-k-m",
+  "artifact_set_complete": true,
+  "artifacts": [
+    {
+      "path": "gemma-3-4b-it-Q4_K_M.gguf",
+      "model": {
+        "id": "ggml-org/gemma-3-4b-it-GGUF/gemma-3-4b-it-Q4_K_M.gguf",
+        "revision": "d0976223747697cb51e056d85c532013931fe52e",
+        "source": "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/d0976223747697cb51e056d85c532013931fe52e/gemma-3-4b-it-Q4_K_M.gguf",
+        "license": "gemma",
+        "architecture": "gemma3",
+        "format": "GGUF",
+        "quantization": "Q4_K_M",
+        "sha256": "882e8d2db44dc554fb0ea5077cb7e4bc49e7342a1f0da57901c0802ea21a0863",
+        "size_bytes": 2489757856,
+        "required_memory_bytes": 8589934592,
+        "workloads": [
+          "image-review"
+        ],
+        "runtime": "llama.cpp",
+        "provenance": {
+          "publisher": "Google",
+          "country": "US",
+          "evidence": [
+            "https://huggingface.co/google/gemma-3-4b-it",
+            "https://ai.google.dev/gemma/docs/core/model_card_3",
+            "https://ai.google.dev/gemma/terms"
+          ],
+          "lineage_complete": false,
+          "lineage_disclosure": "publisher-disclosed",
+          "base_models": [
+            {
+              "id": "google/gemma-3-4b-it",
+              "revision": "Gemma 3 4B IT March 2025 release",
+              "publisher": "Google",
+              "country": "US",
+              "source": "https://huggingface.co/google/gemma-3-4b-it",
+              "evidence": [
+                "https://huggingface.co/google/gemma-3-4b-it",
+                "https://arxiv.org/html/2503.19786v1"
+              ]
+            },
+            {
+              "id": "Google Gemma 3 SigLIP vision encoder",
+              "revision": "Gemma 3 4B IT March 2025 release",
+              "publisher": "Google",
+              "country": "US",
+              "source": "https://huggingface.co/google/gemma-3-4b-it",
+              "evidence": [
+                "https://arxiv.org/html/2503.19786v1",
+                "https://ai.google.dev/gemma/docs/core/model_card_3"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "path": "mmproj-model-f16.gguf",
+      "model": {
+        "id": "ggml-org/gemma-3-4b-it-GGUF/mmproj-model-f16.gguf",
+        "revision": "d0976223747697cb51e056d85c532013931fe52e",
+        "source": "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/d0976223747697cb51e056d85c532013931fe52e/mmproj-model-f16.gguf",
+        "license": "gemma",
+        "architecture": "gemma3",
+        "format": "GGUF",
+        "quantization": "F16",
+        "sha256": "8c0fb064b019a6972856aaae2c7e4792858af3ca4561be2dbf649123ba6c40cb",
+        "size_bytes": 851251104,
+        "required_memory_bytes": 8589934592,
+        "workloads": [
+          "image-review"
+        ],
+        "runtime": "llama.cpp",
+        "provenance": {
+          "publisher": "Google",
+          "country": "US",
+          "evidence": [
+            "https://huggingface.co/google/gemma-3-4b-it",
+            "https://ai.google.dev/gemma/docs/core/model_card_3",
+            "https://ai.google.dev/gemma/terms"
+          ],
+          "lineage_complete": false,
+          "lineage_disclosure": "publisher-disclosed",
+          "base_models": [
+            {
+              "id": "google/gemma-3-4b-it",
+              "revision": "Gemma 3 4B IT March 2025 release",
+              "publisher": "Google",
+              "country": "US",
+              "source": "https://huggingface.co/google/gemma-3-4b-it",
+              "evidence": [
+                "https://huggingface.co/google/gemma-3-4b-it",
+                "https://arxiv.org/html/2503.19786v1"
+              ]
+            },
+            {
+              "id": "Google Gemma 3 SigLIP vision encoder",
+              "revision": "Gemma 3 4B IT March 2025 release",
+              "publisher": "Google",
+              "country": "US",
+              "source": "https://huggingface.co/google/gemma-3-4b-it",
+              "evidence": [
+                "https://arxiv.org/html/2503.19786v1",
+                "https://ai.google.dev/gemma/docs/core/model_card_3"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

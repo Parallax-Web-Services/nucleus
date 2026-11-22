@@ -4,3 +4,8 @@
 /bin/
 /dist/
 __pycache__/
+
+# Local handoff uploads, generated plugin packages, and unrelated review data.
+/.codex-remote-attachments/
+/apps/nebula-cpanel/dist/
+/output/peak-photo-review/
