@@ -74,8 +74,8 @@ type Monitor struct {
 func (m *Monitor) Snapshot() (Snapshot, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if runtime.GOOS != "linux" {
-		return Snapshot{}, errors.New("resource measurements require Linux or WSL2")
+	if runtime.GOOS != "linux" && runtime.GOOS != "android" {
+		return Snapshot{}, errors.New("resource measurements require Linux, WSL2, or Android")
 	}
 	host, err := os.Hostname()
 	if err != nil {
@@ -167,7 +167,12 @@ func (m *Monitor) Snapshot() (Snapshot, error) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
-	command := exec.CommandContext(ctx, "df", "-Pk", "/")
+	mount := "/"
+	if runtime.GOOS == "android" {
+		// Models and application data reside on the writable data volume.
+		mount = "/data"
+	}
+	command := exec.CommandContext(ctx, "df", "-Pk", mount)
 	command.Env = append(os.Environ(), "LC_ALL=C")
 	if out, e := command.Output(); e == nil {
 		lines := strings.Split(strings.TrimSpace(string(out)), "\n")
@@ -177,7 +182,7 @@ func (m *Monitor) Snapshot() (Snapshot, error) {
 				total, e1 := strconv.ParseUint(fields[1], 10, 64)
 				available, e2 := strconv.ParseUint(fields[3], 10, 64)
 				if e1 == nil && e2 == nil && total >= available && total <= math.MaxUint64/1024 {
-					result.Storage = &Storage{Mount: "/", TotalBytes: total * 1024, AvailableBytes: available * 1024, UsedBytes: (total - available) * 1024}
+					result.Storage = &Storage{Mount: mount, TotalBytes: total * 1024, AvailableBytes: available * 1024, UsedBytes: (total - available) * 1024}
 				}
 			}
 		}
