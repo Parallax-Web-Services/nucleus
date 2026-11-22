@@ -40,7 +40,7 @@ from pathlib import Path
 import sys
 root = Path(sys.argv[1])
 files = [root / name for name in (
-    "go.mod", "go.sum", "nebula/testdata/php-capability-v1.json", "THIRD_PARTY_NOTICES/coder-websocket-LICENSE", "docs/NEBULA.md", "README.md", "docs/PROTOCOL.md", "docs/CROSS_DEVICE.md", "docs/HOSTED.md", "scripts/package.sh",
+    "LICENSE", "go.mod", "go.sum", "nebula/testdata/php-capability-v1.json", "THIRD_PARTY_NOTICES/coder-websocket-LICENSE", "docs/NEBULA.md", "README.md", "docs/PROTOCOL.md", "docs/CROSS_DEVICE.md", "docs/HOSTED.md", "scripts/package.sh",
     "hostedworker/README.md", "docs/CPU_INFERENCE.md", "docs/MODEL_PROVENANCE_POLICY.md", "docs/MELD_INFERENCE.md",
     "inference/catalog/gemma-3-4b-it-text.json"
 )]
@@ -68,7 +68,7 @@ for arch in amd64 arm64; do
   CGO_ENABLED=0 GOOS=linux GOARCH="$arch" GOTOOLCHAIN=local \
     "$go_bin" build -trimpath -buildvcs=false -ldflags="-s -w" -o "$payload/bin/nucleus" ./cmd/nucleus
   chmod 0755 "$payload/bin/nucleus"
-  cp -- README.md "$payload/README.md"
+  cp -- LICENSE README.md "$payload/"
   cp -- docs/PROTOCOL.md docs/CROSS_DEVICE.md docs/HOSTED.md \
       docs/CPU_INFERENCE.md docs/MODEL_PROVENANCE_POLICY.md docs/MELD_INFERENCE.md docs/NEBULA.md "$payload/docs/"
   cp -- hostedworker/README.md "$payload/docs/HOSTED_WORKER.md"

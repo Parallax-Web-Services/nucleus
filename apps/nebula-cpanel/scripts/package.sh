@@ -2,10 +2,10 @@
 set -eu
 umask 077
 package_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd -P)
-version=0.1.3-dev
+version=0.1.3-dev.1
 archive="nebula-cpanel-$version.tar.gz"
 distribution_dir="$package_dir/dist/$version"
-set -- README.md bin/nebula-cpanel lib/Parallax/NebulaCPanel/Installer.pm payload/whm/index.cgi payload/whm/parallax_nebula.conf payload/cpanel/index.live.php payload/shared/nebula.svg payload/registration/install.json profiles/reviewed-host-profile.schema.json scripts/package.sh t/installer.t t/renderers.t t/package.t
+set -- LICENSE README.md bin/nebula-cpanel lib/Parallax/NebulaCPanel/Installer.pm payload/whm/index.cgi payload/whm/parallax_nebula.conf payload/cpanel/index.live.php payload/shared/nebula.svg payload/registration/install.json profiles/reviewed-host-profile.schema.json scripts/package.sh t/installer.t t/renderers.t t/package.t
 for file do
     test -f "$package_dir/$file" && test ! -L "$package_dir/$file" || { echo "Missing or linked package source: $file" >&2; exit 1; }
 done

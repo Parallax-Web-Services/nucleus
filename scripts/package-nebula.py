@@ -14,9 +14,9 @@ import tempfile
 import gzip
 
 ROOT = Path(__file__).resolve().parent.parent
-CODE = ('apps/resource-map', 'cloud', 'cmd', 'fabric', 'hostedworker', 'inference',
+CODE = ('apps/resource-map', 'cli', 'cloud', 'cmd', 'fabric', 'hostedworker', 'inference',
         'internal', 'inventory', 'positronic', 'nebula')
-DOCS = ('README.md', 'docs/NEBULA_CLI.md', 'docs/NEBULA.md', 'docs/NEBULA_PLATFORM.md',
+DOCS = ('LICENSE', 'README.md', 'docs/NEBULA_CLI.md', 'docs/NEBULA.md', 'docs/NEBULA_PLATFORM.md',
         'docs/PROTOCOL.md', 'docs/HOSTED.md', 'docs/CROSS_DEVICE.md', 'docs/CPU_INFERENCE.md',
         'docs/MODEL_PROVENANCE_POLICY.md', 'docs/MELD_INFERENCE.md', 'hostedworker/README.md')
 EXACT = ('go.mod', 'go.sum', 'scripts/package-nebula.py',
@@ -87,7 +87,7 @@ def static_elf(path, arch):
 def main():
     os.umask(0o077)
     source = inputs()
-    match = re.search(rb'^const NebulaVersion = "([0-9]+\.[0-9]+\.[0-9]+-(?:dev|alpha[0-9]*))"$',
+    match = re.search(rb'^const NebulaVersion = "([0-9]+\.[0-9]+\.[0-9]+-(?:dev|alpha[0-9]*))"\r?$',
                       source['internal/nucleusapp/nebula_cli.go'], re.M)
     if not match:
         raise SystemExit('Expected an explicitly named NEBULA development/alpha version')

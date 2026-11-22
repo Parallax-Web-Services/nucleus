@@ -128,5 +128,7 @@ State defaults to `$XDG_CONFIG_HOME/nucleus` or the user's platform config direc
 
 The private fabric retains the Alpha 0.2 limits: one coordinator/fabric owner and an immutable logical owner endpoint. Direct transport uses private IPv4; NEBULA relays that same paired fabric over outbound HTTPS. Certificate renewal, endpoint migration, key recovery, additional coordinators, IPv6, federation, automatic LAN browsing, and joining another fabric from an already joined identity are not implemented. Paired nodes are discovered when their authenticated heartbeats arrive, not through unauthenticated network scanning. Detected hardware is an observation, not a guarantee that a model runtime can use it.
 
-No open-source license is implied or selected.
+## License
+
+Parallax Web Services, Inc. licenses NUCLEUS under the [MIT License](LICENSE). Third-party components retain their own terms, including [coder/websocket (ISC)](THIRD_PARTY_NOTICES/coder-websocket-LICENSE) and the [Google Research Readout adaptation (Apache-2.0)](runtimes/meld/LICENSE.readout). Model weights are subject to their publishers’ licenses.
 

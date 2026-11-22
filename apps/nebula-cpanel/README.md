@@ -96,11 +96,11 @@ php -l payload/cpanel/index.live.php
 sh scripts/package.sh
 ```
 
-The original `dist/nebula-cpanel-0.1.0-dev.tar.gz` and the complete `dist/0.1.1-dev/` and `dist/0.1.2-dev/` artifacts are preserved. The new development tarball and public checksum are written under `dist/0.1.3-dev/`. Its internal `SOURCE-SHA256SUMS` binds the included source. Packaging requires ordinary local `tar`, `gzip` and `sha256sum`; those are build tools, not new host installation requirements.
+The original `dist/nebula-cpanel-0.1.0-dev.tar.gz` and the complete `dist/0.1.1-dev/` and `dist/0.1.2-dev/` artifacts are preserved. The MIT-licensed packaging revision writes its tarball and checksum under `dist/0.1.3-dev.1/`. The installed plugin version is `0.1.3-dev`. Its internal `SOURCE-SHA256SUMS` binds the included source. Packaging requires ordinary local `tar`, `gzip` and `sha256sum`; those are build tools, not new host installation requirements.
 
 The offline fixtures test neither live cPanel registration, WHM menu rendering nor Jupiter Feature Manager integration. The live NEBULA portal is separate from those fixtures; they do not verify its availability or NEXUS account sign-in. Host testing remains necessary after the target's vendor-helper effects are reviewed and installation is authorized.
 
-No new project license is selected by this package. The SVG is original code-native Parallax artwork. No cPanel software or third-party icon is redistributed.
+The package includes the [MIT License](LICENSE). The SVG is original code-native Parallax artwork. No cPanel software or third-party icon is redistributed.
 
 ## Official integration references
 
