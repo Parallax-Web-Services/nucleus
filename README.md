@@ -34,7 +34,9 @@ zh init --name workstation
 
 ## Standalone NEBULA CLI
 
-`bash scripts/build.sh` also builds `bin/nebula`, a standalone development CLI for the existing machine, fabric and network operations. Run `./bin/nebula help`. It reuses existing identities and runs the shared engine directly. See [CLI setup](docs/NEBULA_CLI.md) and the [managed Kubernetes platform contract](docs/NEBULA_PLATFORM.md). Published 0.5 packages remain unchanged.
+`bash scripts/build.sh` also builds `bin/nebula`, a standalone development CLI for the existing machine, fabric and network operations. Run `./bin/nebula help`. It reuses existing identities and runs the shared engine directly. See [CLI setup](docs/NEBULA_CLI.md) and the [managed Kubernetes platform contract](docs/NEBULA_PLATFORM.md). The independently versioned NEBULA client imports the Go package `github.com/Parallax-Web-Services/nucleus/cli/nebula` from this repository. [NEBULA source](https://github.com/Parallax-Web-Services/nebula)
+
+The hosted NUCLEUS dashboard is maintained in the marketing repository. [Dashboard source](https://gitlab.com/parallax-web-services/marketing/-/tree/master/apps/nucleus-dashboard)
 
 ## First contact on two LAN computers
 
